@@ -7,7 +7,7 @@ function onDeviceReady() {
 }
 //console.log("binding device ready");
 // Registering onDeviceReady callback with deviceready event
-onDeviceReady();
+document.addEventListener("deviceready", onDeviceReady, false);
 // 'mychat.services' is found in services.js
 // 'mychat.controllers' is found in controllers.js
 angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controllers', 'mychat.services', 'mychat.directives'])
