@@ -7,24 +7,12 @@ function onDeviceReady() {
 }
 //console.log("binding device ready");
 // Registering onDeviceReady callback with deviceready event
-function init(){
-    window.isphone = false;
-    if(document.URL.indexOf("http://") === -1 
-        && document.URL.indexOf("https://") === -1) {
-        window.isphone = true;
-    }
-    if(window.isphone){
-        document.addEventListener("deviceready", onDeviceReady, false);
-    }else{
-        onDeviceReady();
-    }
-}
-
+onDeviceReady();
 // 'mychat.services' is found in services.js
 // 'mychat.controllers' is found in controllers.js
 angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controllers', 'mychat.services', 'mychat.directives'])
 
-.run(function ($ionicPlatform, $rootScope, $location, $state, Auth, $ionicLoading, $ionicModal, $window) {
+.run(function ($ionicPlatform, $rootScope, $location, $state, Auth, $ionicLoading, $ionicModal, $window, pushService) {
 
     $ionicPlatform.ready(function () {
         $rootScope.advisor   =  !!JSON.parse($window.localStorage.getItem('advisor')) ?
@@ -32,6 +20,10 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
         $rootScope.prospect  =  !!JSON.parse($window.localStorage.getItem('prospect')) ?
                 JSON.parse($window.localStorage.getItem('prospect')) : false;
         // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
+         /*Google keys
+          * key: AIzaSyAbXzuAUk1EICCdfpZhoA6-TleQrPWxJuI
+          * Project Number: open-circles-1064/346007849782
+          */
         // for form inputs)
         if (window.cordova && window.cordova.plugins.Keyboard) {
             cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
@@ -56,16 +48,6 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
             }
         });
 
-      
-        /*$rootScope.profile = function(template){
-
-                $ionicModal.fromTemplateUrl('templates/'+template+'.html', {
-                scope: $rootScope
-            }).then(function (modal) {
-                $rootScope.modal = modal;
-                $rootScope.modal.show();
-            });
-        }*/
         
         $rootScope.$on("$stateChangeError", function (event, toState, toParams, fromState, fromParams, error) {
             // We can catch the error thrown when the $requireAuth promise is rejected
@@ -77,9 +59,9 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
     });
 })
 
-.config(function ($stateProvider, $urlRouterProvider) {
+.config(function ($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
     console.log("setting config");
-
+    $ionicConfigProvider.tabs.position('top');
     // Ionic uses AngularUI Router which uses the concept of states
     // Learn more here: https://github.com/angular-ui/ui-router
     // Set up the various states which the app can be in.
@@ -134,7 +116,7 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
         views: {
             'tab-rooms': {
                 templateUrl: 'templates/tab-rooms.html',
-                controller: 'RoomsCtrl'
+                controller: 'ProspectCtrl'
             }
         }
     })
@@ -148,11 +130,11 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
         }
     })
     .state('menu.tab.student', {
-        url: '/studentrooms/:schoolid',
+        url: '/studentrooms',
         views: {
             'tab-student': {
                 templateUrl: 'templates/tab-rooms-student.html',
-                controller: 'StudentCtrl'
+                controller: 'AdvisorCtrl'
             }
         }
     })
@@ -161,7 +143,7 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
         views: {
             'tab-converse': {
                 templateUrl: 'templates/tab-student-convers.html',
-                controller: 'StudentConversCtrl'
+                controller: 'AdvisorConversationsCtrl'
             }
         }
     })
@@ -175,7 +157,7 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
         }
     })
      .state('menu.tab.chat', {
-        url: '/chat/:userId/:schoolid/:questionID/:userID/:indicatorToggle/:question',
+        url: '/chat/:advisorID/:schoolID/:advisorKey/:prospectUserID/:prospectQuestionID/:schoolsQuestionID/:question/:displayName',
         views: {
             'tab-chat':{
                 templateUrl: 'templates/tab-chat.html',
