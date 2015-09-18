@@ -581,7 +581,7 @@ angular.module('mychat.controllers', [])
                 
             }
         )
-    }
+
     $scope.update = function (data){
         if(!!data && data.schoolContact){
             //show the checkbox to send email if school has one
