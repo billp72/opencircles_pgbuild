@@ -7,7 +7,19 @@ function onDeviceReady() {
 }
 //console.log("binding device ready");
 // Registering onDeviceReady callback with deviceready event
-document.addEventListener("deviceready", onDeviceReady, false);
+function init(){
+    window.isphone = false;
+    if(document.URL.indexOf("http://") === -1 
+        && document.URL.indexOf("https://") === -1) {
+        window.isphone = true;
+    }
+    if(window.isphone){
+        document.addEventListener("deviceready", onDeviceReady, false);
+    }else{
+        onDeviceReady();
+    }
+}
+
 // 'mychat.services' is found in services.js
 // 'mychat.controllers' is found in controllers.js
 angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controllers', 'mychat.services', 'mychat.directives'])
@@ -59,7 +71,8 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
     });
 })
 
-.config(function ($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
+.config(['$stateProvider', '$urlRouterProvider', '$ionicConfigProvider', 
+    function ($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
     console.log("setting config");
     $ionicConfigProvider.tabs.position('top');
     // Ionic uses AngularUI Router which uses the concept of states
@@ -169,4 +182,4 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
     // if none of the above states are matched, use this as the fallback
     $urlRouterProvider.otherwise('/login');
 
-});
+}]);
