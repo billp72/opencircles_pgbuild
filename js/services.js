@@ -539,7 +539,7 @@ angular.module('mychat.services', ['firebase'])
 
             //var deferred = $q.defer();
 
-            $ionicLoading.show();
+            //$ionicLoading.show();
 
             $http({
                     method: device_info.method,
@@ -549,12 +549,12 @@ angular.module('mychat.services', ['firebase'])
                 .success(function(data, status, headers, config)
                 {
                     console.log(status + ' - ' + data);
-                    $ionicLoading.hide();
+                    //$ionicLoading.hide();
                 })
                 .error(function(data, status, headers, config)
                 {
                     console.log(status);
-                    $ionicLoading.hide();
+                    //$ionicLoading.hide();
                 });
 
 
