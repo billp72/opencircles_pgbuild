@@ -533,7 +533,7 @@ angular.module('mychat.services', ['firebase'])
 
     function RequestsService($http, $q, $ionicLoading){
 
-        var base_url = 'http://aqueous-crag-7054.herokuapp.com';
+        var base_url = 'https://aqueous-crag-7054.herokuapp.com';
 
         function pushNote(device_info){
 
