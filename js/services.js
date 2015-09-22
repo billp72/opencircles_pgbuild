@@ -508,7 +508,7 @@ angular.module('mychat.services', ['firebase'])
             successHandler,
             errorHandler,
              {
-                "senderID":"open-circles-1064",
+                "senderID":"346007849782",
                 "ecb":"window.onNotificationGCM"
              }
         );
