@@ -438,7 +438,7 @@ angular.module('mychat.controllers', [])
         }
         RequestsService.pushNote(
             {
-             'message':'You have a new Open Circles message from: ' + $scope.displayName,
+             'message':'Message from: ' + $scope.displayName,
              'userID': toggleUserID,
              'method':'GET',
              'path':'push'

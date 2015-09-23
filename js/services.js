@@ -537,11 +537,8 @@ angular.module('mychat.services', ['firebase'])
 
         function pushNote(device_info){
 
-            //var deferred = $q.defer();
-
-            //$ionicLoading.show();
-
-            $http({
+           if(device_info.method === 'POST'){
+                $http({
                     method: device_info.method,
                     url: base_url+'/'+device_info.path, 
                     data: device_info
@@ -549,17 +546,27 @@ angular.module('mychat.services', ['firebase'])
                 .success(function(data, status, headers, config)
                 {
                     console.log(status + ' - ' + data);
-                    //$ionicLoading.hide();
                 })
                 .error(function(data, status, headers, config)
                 {
                     console.log(status);
-                    //$ionicLoading.hide();
                 });
 
-
-            //return deferred.promise;
-
+            }else{
+                 $http({
+                    method: device_info.method,
+                    url: base_url+'/'+device_info.path, 
+                    params: {'message': device_info.message, 'userID': device_info.userID}
+                })
+                .success(function(data, status, headers, config)
+                {
+                    console.log(status + ' - ' + data);
+                })
+                .error(function(data, status, headers, config)
+                {
+                    console.log(status);
+                });
+            }
         };
 
 
