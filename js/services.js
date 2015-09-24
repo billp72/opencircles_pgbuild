@@ -141,7 +141,7 @@ angular.module('mychat.services', ['firebase'])
         },
         get: function (roomID, fn) {
             var rm;
-            rooms.$loaded().then(function(room){//get record doesn't return a promise
+            rooms.$loaded(function(room){//get record doesn't return a promise
                 rm = room.$getRecord(roomID);
                 fn(rm);
             });
