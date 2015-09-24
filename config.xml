@@ -3,7 +3,7 @@
 <widget xmlns     = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
         id        = "com.theopencircles.com.opencircles"
-        version   = "1.0.0">
+        version   = "1.0.1">
     <!--com.ionicframework.ionicfirebase121384 -->
     <name>Open Circles</name>
 
@@ -62,7 +62,7 @@
     <gap:plugin name="org.apache.cordova.file-transfer" />-->
     <gap:plugin name="org.apache.cordova.geolocation" />
     <gap:plugin name="org.apache.cordova.globalization" />
-    <gap:plugin name="org.apache.cordova.inappbrowser" version="0.5.2" />
+    <gap:plugin name="org.apache.cordova.inappbrowser" version="0.2.3" />
     <!--<gap:plugin name="org.apache.cordova.media" />-->
     <!--<gap:plugin name="org.apache.cordova.network-information" />-->
     <gap:plugin name="org.apache.cordova.splashscreen" />
