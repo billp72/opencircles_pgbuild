@@ -367,7 +367,6 @@ angular.module('mychat.controllers', [])
 
 
     Chats.getSelectedRoomName(function(roomName){
-
     // Fetching Chat Records only if a Room is Selected
         if (roomName) {
             $scope.roomName = " - " + roomName;
