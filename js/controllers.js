@@ -664,7 +664,11 @@ angular.module('mychat.controllers', [])
                             console.log('error');
                         });
                     }
-                    Questions.save({question: quest.question.value, organization: $scope.organization}); 
+                    Questions.save({
+                        question: quest.question.value, 
+                        organization: $scope.organization, 
+                        school: quest.schoolID.schoolname
+                    }); 
                 }else{
                     alert('questions must be at least 15 characters long');
                 }
