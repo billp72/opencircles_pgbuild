@@ -104,7 +104,7 @@ angular.module('mychat.controllers', [])
     }
     $scope.createUser = function (user) {
         console.log("Create User Function called");
-        if (!!user && !!user.email && !!user.password && !!user.displayname) {
+        if (!!user && !!user.email && !!user.password && user.password.split('').length>5 && !!user.displayname) {
             $ionicLoading.show({
                 template: 'Signing Up...'
             });
