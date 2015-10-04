@@ -49,8 +49,8 @@
 
     <!-- Core plugins -->
     <gap:plugin name="com.ionic.keyboard" version="1.0.3" />
-    <gap:plugin name="com.phonegap.plugins.pushplugin" version="2.5.0" source="npm" />
-    <gap:plugin name="org.apache.cordova.battery-status" />
+    <gap:plugin name="com.phonegap.plugins.pushplugin" version="2.5.0" />
+    <gap:plugin name="org.apache.cordova.battery-status" source="npm" />
     <gap:plugin name="org.apache.cordova.camera" source="npm" />
     <gap:plugin name="org.apache.cordova.media-capture" source="npm" />
     <gap:plugin name="org.apache.cordova.console" source="npm" />
