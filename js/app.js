@@ -3,6 +3,13 @@
 var firebaseUrl = "https://incandescent-torch-5679.firebaseio.com";
 
 function onDeviceReady() {
+
+    setTimeout(function() { 
+
+        navigator.splashscreen.hide(); 
+
+    }, 3000);
+
     angular.bootstrap(document, ["mychat"]);
 }
 //console.log("binding device ready");
