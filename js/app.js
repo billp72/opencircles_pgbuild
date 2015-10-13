@@ -3,13 +3,12 @@
 var firebaseUrl = "https://incandescent-torch-5679.firebaseio.com";
 
 function onDeviceReady() {
-
     setTimeout(function() { 
 
         navigator.splashscreen.hide(); 
 
     }, 3000);
-
+    
     angular.bootstrap(document, ["mychat"]);
 }
 //console.log("binding device ready");
@@ -18,7 +17,7 @@ document.addEventListener("deviceready", onDeviceReady, false);
 
 // 'mychat.services' is found in services.js
 // 'mychat.controllers' is found in controllers.js
-angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controllers', 'mychat.services', 'mychat.directives'])
+angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controllers', 'mychat.services', 'mychat.directives', 'mychat.autocomplete'])
 
 .run(function ($ionicPlatform, $rootScope, $location, $state, Auth, $ionicLoading, $ionicModal, $window, pushService, $interval) {
 
@@ -32,7 +31,7 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
                         $window.localStorage.removeItem('test');
                     }else{
                         Auth.$unauth();
-                        alert('You must activate local storage on your device to use this app');
+                        alert('Memory warning. close other applications then log back in.');
                         $rootScope.stopTimer();
                     }
                 //console.log('interval hit');
@@ -193,8 +192,17 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
             }
         }
     })
+    .state('menu.tab.settingsMentor', {
+        url: '/settingsMentor',
+        views: {
+            'tab-settingsMentor': {
+                templateUrl: 'templates/tab-settings.html',
+                controller: 'SettingsCtrlMentor'
+            }
+        }
+    })
      .state('menu.tab.chat', {
-        url: '/chat/:advisorID/:schoolID/:advisorKey/:prospectUserID/:prospectQuestionID/:schoolsQuestionID/:question/:displayName/:email',
+        url: '/chat/:advisorID/:schoolID/:advisorKey/:prospectUserID/:prospectQuestionID/:schoolsQuestionID/:question/:displayName/:email/:group',
         views: {
             'tab-chat':{
                 templateUrl: 'templates/tab-chat.html',
