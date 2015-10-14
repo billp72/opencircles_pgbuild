@@ -721,7 +721,7 @@ setting for applicant
 *
 */
 .controller('AskCtrl', ['$scope', '$state', 'Users', 'Rooms', 'SchoolDataService', 'groupsFormDataService','stripDot', '$ionicLoading', '$http', 'Questions',
-    function($scope, $state, Users, Rooms, SchoolDataService, groupsFormDataService, stripDot, $ionicLoading, $http, Questions){
+    function ($scope, $state, Users, Rooms, SchoolDataService, groupsFormDataService, stripDot, $ionicLoading, $http, Questions){
     var icon='',
         grpID,
         grpName;
@@ -829,6 +829,11 @@ setting for applicant
                         organization: $scope.organization, 
                         school: quest.schoolID.schoolname
                     }); 
+                    var keys = Users.getGroupKeys().
+                            then(function(data){
+                                Users.sendPushByGroup(data, grpID, quest.schoolID.schoolID, grpName);
+                            });
+
                 }else{
                     alert('questions must be at least 15 characters long');
                 }
