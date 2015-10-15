@@ -15,6 +15,7 @@ angular.module('mychat.controllers', [])
     'stripDot',
     'pushService',
     '$window',
+    '$timeout',
     function (
     $scope, 
     $ionicModal, 
@@ -29,12 +30,13 @@ angular.module('mychat.controllers', [])
     schoolFormDataService, 
     stripDot,
     pushService,
-    $window) {
+    $window,
+    $timeout) {
     //console.log('Login Controller Initialized');
 
     var ref = new Firebase($scope.firebaseUrl);
     var auth = $firebaseAuth(ref);
-
+    $scope.loginReturned = false;
     $scope.$on('$ionicView.enter', function(){
             $ionicHistory.clearCache();
             $ionicHistory.clearHistory();
@@ -263,6 +265,13 @@ angular.module('mychat.controllers', [])
             $window.localStorage.removeItem('test');
         
             if (user && user.email && user.pwdForLogin) {
+                $timeout(function(){
+                    if(!$scope.loginReturned){
+                        alert('Error: you may be experiencing low connectivity. Try logging in again');
+                        $ionicLoading.hide();
+                        $scope.modal.hide();
+                    }
+                },5000);
                 $ionicLoading.show({
                     template: 'Signing In...'
                 });
@@ -270,7 +279,7 @@ angular.module('mychat.controllers', [])
                     email: user.email,
                     password: user.pwdForLogin
                 }).then(function (authData) {
-                    console.log("Logged in as:" + authData.uid);
+                    $scope.loginReturned = true;
                     ref.child("users").child(authData.uid+'/user').once('value', function (snapshot) {
                         var val = snapshot.val();
     
@@ -306,7 +315,6 @@ angular.module('mychat.controllers', [])
                     //persist data
                     Users.storeIDS(authData.uid, 'userID');
                     Users.storeIDS(val.displayName, 'displayName');
-                    $scope.startTimer();
                     $scope.modal.hide();
                     
                     if(!!val.schoolID){
@@ -380,7 +388,6 @@ settings for mentor
             });
 
             Auth.$unauth();
-            $scope.stopTimer();
     }
        
     $scope.runChangePassword = function(user){
