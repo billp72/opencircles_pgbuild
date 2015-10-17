@@ -129,12 +129,16 @@ angular.module('mychat.controllers', [])
         });
     }
     $scope.createUser = function (user) {
-        console.log("Create User Function called");
+
+        alert(JSON.stringify(user, undefined, 2));
+
         if (!!user && !!user.email && !!user.password && !!user.displayname) {
             if(user.password.split('').length>5){
                 $ionicLoading.show({
                     template: 'Signing Up...'
                 });
+
+            alert(JSON.stringify(user, undefined, 2));
 
             auth.$createUser({
                 email: user.email,
@@ -164,7 +168,9 @@ angular.module('mychat.controllers', [])
         }
     }
     $scope.createStudent = function (user) {
-        console.log("Create Student Function called");
+
+        alert(JSON.stringify(user, undefined, 2));
+
         if (
             !!user && 
             !!user.schoolemail &&
@@ -173,6 +179,7 @@ angular.module('mychat.controllers', [])
              user.schoolID.domain === emailDomain(user.schoolemail)[0]
              ) 
         {
+            alert(JSON.stringify(user, undefined, 2));
           
             $ionicLoading.show({
                 template: 'Signing Up...'
@@ -196,8 +203,14 @@ angular.module('mychat.controllers', [])
                 $scope.modal1.remove();
             }).then(function(userData){
                 var school = Rooms.getSchoolBySchoolID(stripDot.strip(user.schoolID.domain));
+
+                alert(JSON.stringify(school, undefined, 2));
+
                 school.$loaded(function(data){
                         //if the school doesn't exist already, add it
+
+                        alert(JSON.stringify(data, undefined, 2));
+
                     if(data.length <= 0){
                         var room = ref.child("schools").child(stripDot.strip(user.schoolID.domain));
                         room.set({
@@ -214,6 +227,9 @@ angular.module('mychat.controllers', [])
                     }
                 });
             }).then(function(){
+
+                alert('in reset password');
+
                 ref.resetPassword({
                     email: user.schoolemail
                 }, function(error) {
@@ -265,6 +281,9 @@ angular.module('mychat.controllers', [])
             $window.localStorage.removeItem('test');
         
             if (user && user.email && user.pwdForLogin) {
+
+                alert(JSON.stringify(user, undefined, 2));
+
                 $timeout(function(){
                     if(!$scope.loginReturned){
                         alert('Error: you may be experiencing low connectivity. Try logging in again');
@@ -282,8 +301,13 @@ angular.module('mychat.controllers', [])
                     $scope.loginReturned = true;
                     ref.child("users").child(authData.uid+'/user').once('value', function (snapshot) {
                         var val = snapshot.val();
-    
+
+                        alert(JSON.stringify(val, undefined, 2));
+
                     if(!!val.schoolID){
+
+                        alert(JSON.stringify(val, undefined, 2));
+
                         var groupID    = !!val.groupID ? {'groupID':val.groupID, 'groupName':val.groupName} : {'groupID': 'gen', 'groupName':'General'};
                         $rootScope.advisor    = true;
                         $rootScope.prospect   = false;
@@ -295,6 +319,9 @@ angular.module('mychat.controllers', [])
                         Users.storeIDS(val.schoolID, 'schoolID');
                         Users.storeIDS(groupID, 'groupID');
                     }else{
+
+                        alert(JSON.stringify(val, undefined, 2));
+
                         $rootScope.prospect = true;
                         $rootScope.advisor  = false;
                         $rootScope.schoolID = '';
@@ -322,6 +349,9 @@ angular.module('mychat.controllers', [])
                     }else{
                         $state.go('menu.tab.ask');
                     }
+
+                    alert(JSON.stringify(val, undefined, 2));
+                    
                     $ionicLoading.hide();  
                 });
                 
@@ -415,9 +445,7 @@ setting for applicant
             $ionicLoading.show({
                 template: 'Logging Out...'
             });
-
             Auth.$unauth();
-            $scope.stopTimer();
     }
        
     $scope.runChangePassword = function(user){

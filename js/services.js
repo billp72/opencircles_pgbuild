@@ -511,16 +511,14 @@ angular.module('mychat.services', ['firebase'])
         }
     }
 }])
-/*.service('sendMultiPush', ['$http', '$q', '$ionicLoading',  MultiService]);
-    function MultiService($http, $q, $ionicLoading){
-        function httpService(list, msg){
-            var i=0,
-            var len = list.length;
-            for(i;i<len;i++){
+.service('checkNetwork', ['$http', '$q',  MultiService]);
+    function MultiService($http, $q){
+        function netCallback(list, msg){
+          
                 $http({
                     method: 'GET',
                     url: base_url+'/push',
-                    params: {'message': msg, 'userID': list[i]}
+                    params: {}
                 })
                 .success(function(data, status, headers, config)
                 {
@@ -530,12 +528,12 @@ angular.module('mychat.services', ['firebase'])
                 {
                     console.log(status);
                 });
-            }
+         
         }
         return {
-            httpService: httpService
+            networkService: networkService
         }
-    }*/
+    }
 .service('RequestsService', ['$http', '$q', '$ionicLoading',  RequestsService]);
 
     function RequestsService($http, $q, $ionicLoading){
