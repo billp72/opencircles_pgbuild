@@ -511,29 +511,7 @@ angular.module('mychat.services', ['firebase'])
         }
     }
 }])
-.service('checkNetwork', ['$http', '$q',  MultiService]);
-    function MultiService($http, $q){
-        function netCallback(list, msg){
-          
-                $http({
-                    method: 'GET',
-                    url: base_url+'/push',
-                    params: {}
-                })
-                .success(function(data, status, headers, config)
-                {
-                    console.log(status + ' - ' + data);
-                })
-                .error(function(data, status, headers, config)
-                {
-                    console.log(status);
-                });
-         
-        }
-        return {
-            networkService: networkService
-        }
-    }
+
 .service('RequestsService', ['$http', '$q', '$ionicLoading',  RequestsService]);
 
     function RequestsService($http, $q, $ionicLoading){
