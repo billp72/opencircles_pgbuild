@@ -220,8 +220,13 @@ angular.module('mychat.autocomplete', ['firebase'])
             groups.$loaded(function(data){
                 var general = $firebase(ref.child('general')).$asArray();
                     general.$loaded(function(grp){
-                        allGroups = grp.concat(data);
-                        cb(allGroups);
+                        if(data.length > 0){
+                            allGroups = grp.concat(data);
+                            cb(allGroups);
+                        }else{
+                            cb(grp);
+                        }
+                        
                     });
             })
         }
