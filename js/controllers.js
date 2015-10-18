@@ -130,15 +130,11 @@ angular.module('mychat.controllers', [])
     }
     $scope.createUser = function (user) {
 
-        alert(JSON.stringify(user, undefined, 2));
-
         if (!!user && !!user.email && !!user.password && !!user.displayname) {
             if(user.password.split('').length>5){
                 $ionicLoading.show({
                     template: 'Signing Up...'
                 });
-
-            alert(JSON.stringify(user, undefined, 2));
 
             auth.$createUser({
                 email: user.email,
@@ -168,9 +164,6 @@ angular.module('mychat.controllers', [])
         }
     }
     $scope.createStudent = function (user) {
-
-        alert(JSON.stringify(user, undefined, 2));
-
         if (
             !!user && 
             !!user.schoolemail &&
@@ -179,7 +172,6 @@ angular.module('mychat.controllers', [])
              user.schoolID.domain === emailDomain(user.schoolemail)[0]
              ) 
         {
-            alert(JSON.stringify(user, undefined, 2));
           
             $ionicLoading.show({
                 template: 'Signing Up...'
@@ -203,14 +195,8 @@ angular.module('mychat.controllers', [])
                 $scope.modal1.remove();
             }).then(function(userData){
                 var school = Rooms.getSchoolBySchoolID(stripDot.strip(user.schoolID.domain));
-
-                alert(JSON.stringify(school, undefined, 2));
-
                 school.$loaded(function(data){
                         //if the school doesn't exist already, add it
-
-                        alert(JSON.stringify(data, undefined, 2));
-
                     if(data.length <= 0){
                         var room = ref.child("schools").child(stripDot.strip(user.schoolID.domain));
                         room.set({
@@ -227,9 +213,6 @@ angular.module('mychat.controllers', [])
                     }
                 });
             }).then(function(){
-
-                alert('in reset password');
-
                 ref.resetPassword({
                     email: user.schoolemail
                 }, function(error) {
@@ -282,8 +265,6 @@ angular.module('mychat.controllers', [])
         
             if (user && user.email && user.pwdForLogin) {
 
-                alert(JSON.stringify(user, undefined, 2));
-
                 $timeout(function(){
                     if(!$scope.loginReturned){
                         alert('Error: you may be experiencing low connectivity. Try logging in again');
@@ -301,12 +282,7 @@ angular.module('mychat.controllers', [])
                     $scope.loginReturned = true;
                     ref.child("users").child(authData.uid+'/user').once('value', function (snapshot) {
                         var val = snapshot.val();
-
-                        alert(JSON.stringify(val, undefined, 2));
-
                     if(!!val.schoolID){
-
-                        alert(JSON.stringify(val, undefined, 2));
 
                         var groupID    = !!val.groupID ? {'groupID':val.groupID, 'groupName':val.groupName} : {'groupID': 'gen', 'groupName':'General'};
                         $rootScope.advisor    = true;
@@ -319,8 +295,6 @@ angular.module('mychat.controllers', [])
                         Users.storeIDS(val.schoolID, 'schoolID');
                         Users.storeIDS(groupID, 'groupID');
                     }else{
-
-                        alert(JSON.stringify(val, undefined, 2));
 
                         $rootScope.prospect = true;
                         $rootScope.advisor  = false;
@@ -349,8 +323,6 @@ angular.module('mychat.controllers', [])
                     }else{
                         $state.go('menu.tab.ask');
                     }
-
-                    alert(JSON.stringify(val, undefined, 2));
                     
                     $ionicLoading.hide();  
                 });
@@ -388,7 +360,7 @@ settings for mentor
                     $scope.user.group = matches[0];
                     $scope.data.list = matches; 
                     $rootScope.group = {
-                        'groupID': matches[0].$id,
+                        'groupID': matches[0].groupID,
                         'groupName': matches[0].groupName
                     }
                 //console.log($rootScope.group);     
@@ -397,7 +369,7 @@ settings for mentor
         }
         $scope.update = function (data){
             $rootScope.group = {
-                'groupID': data.$id,
+                'groupID': data.groupID,
                 'groupName': data.groupName
             }
         }
@@ -420,9 +392,7 @@ settings for mentor
             Auth.$unauth();
     }
        
-    $scope.runChangePassword = function(user){
-            ChangePassword.change(user);
-    }
+  
 }])
 /*
 setting for applicant
@@ -772,12 +742,19 @@ setting for applicant
     $scope.data = { 'list' : '', 'search' : '', 'groups': '', 'listg':''};
 
     $scope.search = function() {
-
         SchoolDataService.searchSchools($scope.data.search).then(
             function(matches) {
+                $scope.data.groups = null;
+                if(!!$scope.data.listg){
+                    $scope.data.listg = null;
+                }
+                
                 $scope.user.schoolID = matches[0];
                 $scope.data.list = matches;
-                if(!!$scope.user.schoolID && $scope.user.schoolID.schoolContact !== undefined){
+                if(!!$scope.user.schoolID && !!$scope.user.schoolID.schoolID){
+                    groupsFormDataService.retrieveDataSort($scope.user.schoolID.schoolID);
+                }
+                if(!!$scope.user.schoolID && !!$scope.user.schoolID.schoolContact !== undefined){
                     $scope.hasEmail = true;
                 }
                 
@@ -785,6 +762,11 @@ setting for applicant
         )
     }
     $scope.update = function (data){
+        $scope.data.groups = null;
+        if(!!$scope.data.listg){
+           $scope.data.listg = null;
+        }
+        groupsFormDataService.retrieveDataSort(data.schoolID);
         if(!!data && data.schoolContact){
             //show the checkbox to send email if school has one
             $scope.hasEmail = true;
@@ -795,30 +777,15 @@ setting for applicant
             function(matches) {
                 $scope.user.group = matches[0];
                 $scope.data.listg = matches;
-                
             }
         )
     }
-    $scope.updateg = function (data){
-        if(!!$scope.user.schoolID && $scope.user.schoolID.category !== data.category){
-            if(data.category !== 'g'){
-                if($scope.user.schoolID.schoolname !== undefined){
-                    alert('this group cannot be linked to '+ $scope.user.schoolID.schoolname);
-                }
-            }
-        }
-    }
+  
     $scope.ask = function (quest){         
           if(!quest.group && !quest.group.groupID){
                 alert('please select a group');
                 return;
-          }
-          if(quest.group.category !== quest.schoolID.category){
-             if(quest.group.category !== 'g'){
-                alert('this group cannot be linked to '+ quest.schoolID.schoolname);
-                return;
-             }
-          }
+          }   
           grpID = quest.group.groupID;
           grpName = quest.group.groupName;
             if(!!quest.schoolID){
