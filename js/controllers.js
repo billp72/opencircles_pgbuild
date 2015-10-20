@@ -271,7 +271,7 @@ angular.module('mychat.controllers', [])
                         $ionicLoading.hide();
                         $scope.modal.hide();
                     }
-                },5000);
+                },8000);
                 $ionicLoading.show({
                     template: 'Signing In...'
                 });
