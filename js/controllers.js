@@ -373,8 +373,7 @@ settings for mentor
                 'groupName': data.groupName
             }
         }
- 
-    $scope.deleteAccount = function(){
+        $scope.deleteAccount = function(){
                 $ionicModal.fromTemplateUrl('templates/delete-account.html', {
                     scope: $scope
                 }).then(function (modal) {
@@ -383,14 +382,14 @@ settings for mentor
                 });
         }
 
-    $scope.logout = function () {
+        $scope.logout = function () {
             console.log("Logging out from the app");
             $ionicLoading.show({
                 template: 'Logging Out...'
             });
 
             Auth.$unauth();
-    }
+        }
        
   
 }])
