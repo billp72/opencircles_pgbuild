@@ -350,22 +350,26 @@ settings for mentor
 */
 .controller('SettingsCtrlMentor', ['$scope', '$rootScope','Users', 'ChangePassword', '$state', '$ionicLoading', '$ionicModal', 'Auth', 'groupsMentorsDataService',
     function ($scope, $rootScope, Users, ChangePassword, $state, $ionicLoading, $ionicModal, Auth, groupsMentorsDataService) {
-    console.log('settings mentor initialized');
+        console.log('settings mentor initialized');
+        //groupsMentorsDataService.retrieveDataSort();
+        
         $scope.user = {}
         $scope.data = { 'list' : '', 'groups' : ''};
 
         $scope.searchg = function() {
-            groupsMentorsDataService.searchSchools($scope.data.groups).then(
-                function(matches) {
-                    $scope.user.group = matches[0];
-                    $scope.data.list = matches; 
-                    $rootScope.group = {
-                        'groupID': matches[0].groupID,
-                        'groupName': matches[0].groupName
+            groupsMentorsDataService.retrieveDataSort($scope.data.groups, function(promise){
+                promise.then(
+                    function(matches) {
+                        $scope.user.group = matches[0];
+                        $scope.data.list = matches; 
+                        $rootScope.group = {
+                            'groupID': matches[0].groupID,
+                            'groupName': matches[0].groupName
+                        }
+                    //console.log($rootScope.group);     
                     }
-                //console.log($rootScope.group);     
-                }
-            )
+                )
+            });
         }
         $scope.update = function (data){
             $rootScope.group = {
@@ -381,7 +385,7 @@ settings for mentor
                     $scope.modal.show();
                 });
         }
-
+       
         $scope.logout = function () {
             console.log("Logging out from the app");
             $ionicLoading.show({
@@ -772,12 +776,14 @@ setting for applicant
         } 
     }
    $scope.searchg = function() {
+     if(!!$scope.data.list){
         groupsFormDataService.groupList($scope.data.groups).then(
             function(matches) {
                 $scope.user.group = matches[0];
                 $scope.data.listg = matches;
             }
         )
+      }
     }
   
     $scope.ask = function (quest){         

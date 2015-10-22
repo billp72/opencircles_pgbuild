@@ -122,41 +122,38 @@ angular.module('mychat.autocomplete', ['firebase'])
 */
 .factory('groupsMentorsDataService', ['$q', '$timeout', 'groupsMentorData', 'Users', 
     function ($q, $timeout, groupsMentorData, Users) {
-        var schools='';
-        groupsMentorData.getGroupByID(Users.getIDS('schoolID'), function(data){
 
-            schools = data.sort(function(a, b) {
+        var retrieveDataSort = function (searchFilter, cb){
+                groupsMentorData.getGroupByID(Users.getIDS('schoolID'), function(data){
 
-                var schoolA = a.groupName.toLowerCase();
-                var schoolB = b.groupName.toLowerCase();
+                    var schools = data.sort(function(a, b) {
 
-                if(schoolA > schoolB) return 1;
-                if(schoolA < schoolB) return -1;
+                        var schoolA = a.groupName.toLowerCase();
+                        var schoolB = b.groupName.toLowerCase();
 
-                return 0;
-            });
-        });
-        var searchSchool = function(searchFilter) {    
-            //console.log('Searching school for ' + searchFilter);
-            var deferred = $q.defer();
-            var matches = schools.filter( function(school) {
-                if(school.groupName.toLowerCase().indexOf(searchFilter.toLowerCase()) !== -1 ) return true;
-            })
+                        if(schoolA > schoolB) return  1;
+                        if(schoolA < schoolB) return -1;
 
-            $timeout( function(){
+                        return 0;
+                    });
+
+                    var deferred = $q.defer();
+                    var matches = schools.filter( function(school) {
+                        if(school.groupName.toLowerCase().indexOf(searchFilter.toLowerCase()) !== -1 ) return true;
+                    })
+
+                    $timeout( function(){
         
-                deferred.resolve( matches );
+                        deferred.resolve( matches );
 
-            }, 100);
+                    }, 100);
 
-            return deferred.promise;
-
-        };
+                    cb(deferred.promise);
+                });
+        }
 
     return {
-
-        searchSchools : searchSchool
-
+        retrieveDataSort: retrieveDataSort
     }
 }])
 
