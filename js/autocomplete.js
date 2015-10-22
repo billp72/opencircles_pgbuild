@@ -202,7 +202,7 @@ angular.module('mychat.autocomplete', ['firebase'])
         }
 }])
 /*
-*get school data
+*get groups data
 */
 .factory('groupsMentorData', ['$firebase', function ($firebase){
     var groups='';

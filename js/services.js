@@ -321,6 +321,14 @@ angular.module('mychat.services', ['firebase'])
     return {
         strip: function(ID){
             return ID.replace(/\./g,'');
+        },
+        generatePass: function () {
+             var possibleChars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?_-'.split('');
+             var password = '';
+             for(var i = 0; i < 16; i += 1) {
+                    password += possibleChars[Math.floor(Math.random() * possibleChars.length)];
+            }
+            return password;
         }
     }
 }])

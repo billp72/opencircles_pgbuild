@@ -36,7 +36,6 @@ angular.module('mychat.controllers', [])
 
     var ref = new Firebase($scope.firebaseUrl);
     var auth = $firebaseAuth(ref);
-    $scope.loginReturned = false;
     $scope.$on('$ionicView.enter', function(){
             $ionicHistory.clearCache();
             $ionicHistory.clearHistory();
@@ -83,14 +82,6 @@ angular.module('mychat.controllers', [])
     function emailDomain(email){
         var tolower = email.toLowerCase();
         return (/[@]/.exec(tolower)) ? /[^@]+$/.exec(tolower) : undefined;
-    }
-     function generatePass() {
-        var possibleChars = ['abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?_-'];
-        var password = '';
-        for(var i = 0; i < 16; i += 1) {
-            password += possibleChars[Math.floor(Math.random() * possibleChars.length)];
-        }
-        return password;
     }
      $scope.openModal = function(template){
         $ionicModal.fromTemplateUrl('templates/'+template+'.html', {
@@ -172,13 +163,13 @@ angular.module('mychat.controllers', [])
              user.schoolID.domain === emailDomain(user.schoolemail)[0]
              ) 
         {
-          
-            $ionicLoading.show({
+
+           $ionicLoading.show({
                 template: 'Signing Up...'
             });
             auth.$createUser({
                 email: user.schoolemail,
-                password: generatePass()
+                password: stripDot.generatePass()
             }).then(function (userData) {
                 alert("User created successfully!");
                 ref.child("users").child(userData.uid).set({
@@ -265,13 +256,6 @@ angular.module('mychat.controllers', [])
         
             if (user && user.email && user.pwdForLogin) {
 
-                $timeout(function(){
-                    if(!$scope.loginReturned){
-                        alert('Error: you may be experiencing low connectivity. Try logging in again');
-                        $ionicLoading.hide();
-                        $scope.modal.hide();
-                    }
-                },8000);
                 $ionicLoading.show({
                     template: 'Signing In...'
                 });
@@ -279,7 +263,7 @@ angular.module('mychat.controllers', [])
                     email: user.email,
                     password: user.pwdForLogin
                 }).then(function (authData) {
-                    $scope.loginReturned = true;
+                
                     ref.child("users").child(authData.uid+'/user').once('value', function (snapshot) {
                         var val = snapshot.val();
                     if(!!val.schoolID){
