@@ -57,18 +57,19 @@ angular.module('mychat.controllers', [])
 
     $scope.search = function() {
 
-        schoolFormDataService.schoolList($scope.data.search).then(
-            function(matches) {
-                $scope.user.schoolID = matches[0];
-                $scope.data.list = matches;
-                $scope.user.schoolemail = '@'+$scope.user.schoolID.domain;
-                var textBox = document.getElementById('schoolemail');
-                    moveCaretToStart(textBox);
-                    $window.setTimeout(function() {
+        schoolFormDataService.retrieveDataSort($scope.data.search, 
+            function(promise) {
+                promise.then(function(matches){
+                    $scope.user.schoolID = matches[0];
+                    $scope.data.list = matches;
+                    $scope.user.schoolemail = '@'+$scope.user.schoolID.domain;
+                    var textBox = document.getElementById('schoolemail');
                         moveCaretToStart(textBox);
-                    }, 1);
-            }
-        )
+                        $window.setTimeout(function() {
+                            moveCaretToStart(textBox);
+                        }, 1);
+                });
+            });
     }
     
     $scope.update = function(school){

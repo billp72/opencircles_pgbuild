@@ -1,7 +1,60 @@
 angular.module('mychat.autocomplete', ['firebase'])
 
 /*
-* autocomplete search
+* this is to populate the form with schools when the mentor is creating an account
+*/
+.factory('schoolFormDataService', ['$q', '$timeout', 'schoolFormData', 
+    function ($q, $timeout, schoolFormData){
+    var retrieveDataSort = function (searchFilter, cb){
+                schoolFormData.all(function(data){
+                    
+                    var schools = data.data.sort(function(a, b) {
+
+                        var schoolA = a.name.toLowerCase();
+                        var schoolB = b.name.toLowerCase();
+
+                        if(schoolA > schoolB) return  1;
+                        if(schoolA < schoolB) return -1;
+
+                        return 0;
+                    });
+
+                    var deferred = $q.defer();
+                    var matches = schools.filter( function(school) {
+                        if(school.name.toLowerCase().indexOf(searchFilter.toLowerCase()) !== -1 ) return true;
+                    })
+
+                    $timeout( function(){
+        
+                        deferred.resolve( matches );
+
+                    }, 100);
+
+                    cb(deferred.promise);
+                });
+        }
+
+    return {
+        retrieveDataSort: retrieveDataSort
+    }
+}])
+/*
+* get school data when mentor is filling out form
+*/
+.factory('schoolFormData', ['$http', function ($http){
+    var data = $http.get('http://www.theopencircles.com/opencircles/schools.php');
+
+    return {
+        all: function(cb){
+            data.then(function(res){
+                cb(res);
+            });
+           
+        }
+    }
+}])
+/*
+* autocomplete search schools when applicant is asking a question
 */
 .factory('SchoolDataService', ['$q', '$timeout', 'schoolData', function ($q, $timeout, schoolData) {
         var datas = schoolData.all();
@@ -43,7 +96,7 @@ angular.module('mychat.autocomplete', ['firebase'])
     }
 }])
 /*
-*get school data
+*get school data for applicant asking
 */
 .factory('schoolData', ['$firebase', function ($firebase){
 
@@ -56,65 +109,6 @@ angular.module('mychat.autocomplete', ['firebase'])
         }
     }
      
-}])
-/*
-* this is to populate the form with schools when the user is creating an account
-*/
-.factory('schoolFormDataService', ['$q', '$timeout', 'schoolFormData', 
-    function ($q, $timeout, schoolFormData){
-
-    var datas = schoolFormData.all();
-        var schools='';
-    
-        datas.then(function(data){
-    
-           schools = data.data.sort(function(a, b) {
-                
-                var schoolA = a.name.toLowerCase();
-                var schoolB = b.name.toLowerCase();
-
-                if(schoolA > schoolB) return 1;
-                if(schoolA < schoolB) return -1;
-
-                return 0;
-            });
-        
-       });
-       var schoolList = function(searchFilter) {
-         
-            //console.log('Searching school for ' + searchFilter);
-
-            var deferred = $q.defer();
-
-            var matches = schools.filter( function(school) {
-                if(school.name.toLowerCase().indexOf(searchFilter.toLowerCase()) !== -1 ) return true;
-            })
-
-            $timeout( function(){
-        
-                deferred.resolve( matches );
-
-            }, 100);
-
-            return deferred.promise;
-
-        };
-
-    return {
-
-        schoolList : schoolList
-
-    }
-}])
-
-.factory('schoolFormData', ['$http', function ($http){
-    var data = $http.get('http://www.theopencircles.com/opencircles/schools.php');
-
-    return {
-        all: function(){
-            return data;
-        }
-    }
 }])
 /*
 * FOR ALL GROUP SEARCHES
