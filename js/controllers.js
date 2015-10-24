@@ -283,7 +283,7 @@ angular.module('mychat.controllers', [])
 
                         $rootScope.prospect = true;
                         $rootScope.advisor  = false;
-                        $rootScope.schoolID = '';
+                        $rootScope.schoolID = undefined;
                         $rootScope.email = val.email;
                         $rootScope.organization = !!val.organization ? val.organization : 'none';
                         //persist data
@@ -377,6 +377,13 @@ settings for mentor
                 template: 'Logging Out...'
             });
 
+            $rootScope.schoolID    = undefined;
+            $rootScope.group       = undefined;
+            $rootScope.advisor     = undefined;
+            $rootScope.prospect    = undefined;
+            $rootScope.userID      = undefined;
+            $rootScope.displayName = undefined;
+
             Auth.$unauth();
         }
        
@@ -403,6 +410,14 @@ setting for applicant
             $ionicLoading.show({
                 template: 'Logging Out...'
             });
+
+            $rootScope.advisor      = undefined;
+            $rootScope.prospect     = undefined;
+            $rootScope.userID       = undefined;
+            $rootScope.displayName  = undefined;
+            $rootScope.email        = undefined;
+            $rootScope.organization = undefined;
+
             Auth.$unauth();
     }
        
