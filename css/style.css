@@ -20,8 +20,8 @@
     text-align: center;
 }
 #comment-textarea{
-    background-color:#ccffff;
-    height:150px;
+    height:100px;
+    margin: 0;
 }
 .started-conversation {
     color:#135dda;
@@ -96,3 +96,35 @@ h4.hometxt{
 #schoolemail:focus{
     background-color: #FFEFDB;
 };
+
+/* floating material button classes */
+/*.float-button1 {
+    background-color:#303f9f;
+    opacity: 0.9;
+    color: white;
+    border-radius: 50%;
+    border-radius:15% 0 0 0;
+    width: 30px;
+    padding: 25px;
+    font-size: 40px;
+    position: fixed;
+    bottom: 5%;
+    right: 5%;
+    z-index: 2000;
+}
+
+.float-button1 .height_fix1 {
+    margin-top: 100%;
+    border: 1px solid red;
+}
+ 
+.float-button1 .content {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    margin-top: -20px;
+    color: white;
+}*/

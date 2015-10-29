@@ -10,7 +10,6 @@ angular.module('mychat.controllers', [])
     '$ionicLoading', 
     '$rootScope', 
     '$ionicHistory', 
-    'SchoolDataService', 
     'schoolFormDataService', 
     'stripDot',
     'pushService',
@@ -26,7 +25,6 @@ angular.module('mychat.controllers', [])
     $ionicLoading, 
     $rootScope, 
     $ionicHistory, 
-    SchoolDataService, 
     schoolFormDataService, 
     stripDot,
     pushService,
@@ -120,41 +118,7 @@ angular.module('mychat.controllers', [])
             }
         });
     }
-    $scope.createUser = function (user) {
-
-        if (!!user && !!user.email && !!user.password && !!user.displayname) {
-            if(user.password.split('').length>5){
-                $ionicLoading.show({
-                    template: 'Signing Up...'
-                });
-
-            auth.$createUser({
-                email: user.email,
-                password: user.password
-            }).then(function (userData) {
-                alert("User created successfully!");
-                ref.child("users").child(userData.uid).set({
-                   user:{
-                        email: user.email,
-                        displayName: user.displayname,
-                        grade: user.grade,
-                        organization: user.organization
-                    }
-                });
-                $ionicLoading.hide();
-                $scope.modal1.hide();
-                $scope.modal1.remove();
-            }).catch(function (error) {
-                alert("Error: " + error);
-                $ionicLoading.hide();
-            });
-            }else{
-                alert("Your password must be at least 6 characters");
-            }
-        } else{
-            alert("Please fill all details");
-        }
-    }
+ 
     $scope.createStudent = function (user) {
         if (
             !!user && 
@@ -175,19 +139,21 @@ angular.module('mychat.controllers', [])
                 alert("User created successfully!");
                 ref.child("users").child(userData.uid).set({
                     user:{
-                        displayName: user.displayname,
+                        displayName: user.displayname +'-'+ stripDot.shortRandom(),
                         grade: user.grade,
                         schoolID: stripDot.strip(user.schoolID.domain),
                         schoolEmail: user.schoolemail,
-                        major: user.major
+                        email: user.email
                     }
                 });
                 $ionicLoading.hide();
                 $scope.modal1.hide();
                 $scope.modal1.remove();
             }).then(function(userData){
-                var school = Rooms.getSchoolBySchoolID(stripDot.strip(user.schoolID.domain));
+
+                var school = Rooms.checkSchoolExist(stripDot.strip(user.schoolID.domain));
                 school.$loaded(function(data){
+
                         //if the school doesn't exist already, add it
                     if(data.length <= 0){
                         var room = ref.child("schools").child(stripDot.strip(user.schoolID.domain));
@@ -267,49 +233,30 @@ angular.module('mychat.controllers', [])
                 
                     ref.child("users").child(authData.uid+'/user').once('value', function (snapshot) {
                         var val = snapshot.val();
-                    if(!!val.schoolID){
-
                         var groupID    = !!val.groupID ? {'groupID':val.groupID, 'groupName':val.groupName} : {'groupID': 'gen', 'groupName':'General'};
-                        $rootScope.advisor    = true;
-                        $rootScope.prospect   = false;
-                        $rootScope.schoolID   = val.schoolID;
-                        $rootScope.group = groupID;
-                        //persist data
-                        Users.storeIDS(true, 'advisor');
-                        Users.removeItem('prospect');
+                      
+                        $rootScope.schoolID    = val.schoolID;
+                        $rootScope.group       = groupID;
+                        $rootScope.email       = val.email;
+                        //$rootScope.groupKey    = !!val.groups ? true : false;
+                        $rootScope.userID      = authData.uid;
+                        $rootScope.displayName = val.displayName;
+                       
+                    //persist data
                         Users.storeIDS(val.schoolID, 'schoolID');
                         Users.storeIDS(groupID, 'groupID');
-                    }else{
+                        Users.storeIDS(authData.uid, 'userID');
+                        Users.storeIDS(val.displayName, 'displayName');
 
-                        $rootScope.prospect = true;
-                        $rootScope.advisor  = false;
-                        $rootScope.schoolID = undefined;
-                        $rootScope.email = val.email;
-                        $rootScope.organization = !!val.organization ? val.organization : 'none';
-                        //persist data
-                        Users.storeIDS(true, 'prospect');
-                        Users.removeItem('advisor');
-                        Users.removeItem('schoolID');
-                        Users.removeItem('groupID');
+                        pushService.register().then(function(token){
+                            console.log("token: ", token);
+                        });
 
-                    }
-                    $rootScope.userID = authData.uid;
-                    $rootScope.displayName = val.displayName;
-                     pushService.register().then(function(token){
-                        console.log("token: ", token);
-                    });
-                    //persist data
-                    Users.storeIDS(authData.uid, 'userID');
-                    Users.storeIDS(val.displayName, 'displayName');
-                    $scope.modal.hide();
+                        $scope.modal.hide();
                     
-                    if(!!val.schoolID){
                         $state.go('menu.tab.student');
-                    }else{
-                        $state.go('menu.tab.ask');
-                    }
                     
-                    $ionicLoading.hide();  
+                        $ionicLoading.hide();  
                 });
                 
             }).catch(function (error) {
@@ -336,11 +283,21 @@ settings for mentor
 .controller('SettingsCtrlMentor', ['$scope', '$rootScope','Users', 'ChangePassword', '$state', '$ionicLoading', '$ionicModal', 'Auth', 'groupsMentorsDataService',
     function ($scope, $rootScope, Users, ChangePassword, $state, $ionicLoading, $ionicModal, Auth, groupsMentorsDataService) {
         console.log('settings mentor initialized');
-        //groupsMentorsDataService.retrieveDataSort();
+     
+        /*part of add/edit group
+        */
+        //$scope.showEditGroup = !!$scope.groupKey ? true : false;
+        //$scope.hideNewGroup = $scope.groupKey;
         
-        $scope.user = {}
+        $scope.add  = {};
+        $scope.user = {};
         $scope.data = { 'list' : '', 'groups' : ''};
+        $scope.add.newgroup = !!Users.getIDS('groupName') ? Users.getIDS('groupName') : '';
 
+        $scope.askQuestion = function(){
+
+            $state.go('menu.tab.ask');
+        }
         $scope.searchg = function() {
             groupsMentorsDataService.retrieveDataSort($scope.data.groups, function(promise){
                 promise.then(
@@ -356,75 +313,98 @@ settings for mentor
                 )
             });
         }
+        $scope.create = function(add){
+            $scope.allGroups = Users.getAllGroups($scope.userID);
+            
+            $scope.allGroups.$loaded(function(data){
+                if(!!data){
+                    var groups,
+                        groupsNum = 0,
+                        removeWhiteInput = add.newgroup.replace(/\s/g, "");
+
+                    angular.forEach(data, function(key, value){
+                        var removeWhiteKeys  = key.groupName.replace(/\s/g, "");
+                            groupsNum +=1;
+                        if(removeWhiteKeys.toLowerCase() === removeWhiteInput.toLowerCase()){
+                            groups = key.groupName;
+                        }
+                    });
+                    if(groupsNum < 2){
+                        if(!groups){
+
+                            Users.createGroups($scope.schoolID, add.newgroup, function(promise){
+                                promise.then(function(data){
+
+                                    var key = data.key().groupKey;
+                                    var ID  = data.key().groupID;
+                                
+                                        Users.addGroupKey($scope.userID, key, add.newgroup, ID);
+                                        Users.storeIDS(add.newgroup, 'groupName');
+                        
+                                    $scope.hideNewGroup  = true;
+    
+                                });
+                            });
+                   
+                        }else{
+                            alert(groups + ' is already a group');
+                            $scope.add.newgroup = !!Users.getIDS('groupName') ? Users.getIDS('groupName') : '';
+                        }
+                    }else{
+                        alert('You have reached your allotted number of groups');
+                        $scope.add.newgroup = Users.getIDS('groupName');
+                    }
+                }
+            });
+               
+               
+        }
+        /*part of add/edit group*/
+        /*$scope.edit = function(add){
+            $scope.groupRemoveName = add.newgroup;
+            $ionicModal.fromTemplateUrl('templates/delete-group.html', {
+                    scope: $scope
+                }).then(function (modal) {
+                    $scope.modalGrp = modal;
+                    $scope.modalGrp.show();
+                });
+            
+        }*/
+        /*$scope.removeGroup = function(){
+            var groupKey = !!Users.getIDS('groupKey') ? Users.getIDS('groupKey') : $scope.groupKey;
+            Users.editGroup(groupKey, $scope.schoolID, $scope.userID, $scope.groupRemoveName);
+
+            Users.removeItem('groupKey');
+            Users.removeItem('groupName');
+            $scope.showEditGroup = false;
+            $scope.hideNewGroup  = false;
+            $scope.modalGrp.hide();
+        }*/
         $scope.update = function (data){
             $rootScope.group = {
                 'groupID': data.groupID,
                 'groupName': data.groupName
             }
         }
-        $scope.deleteAccount = function(){
+        /*$scope.deleteAccount = function(){
                 $ionicModal.fromTemplateUrl('templates/delete-account.html', {
                     scope: $scope
                 }).then(function (modal) {
                     $scope.modal = modal;
                     $scope.modal.show();
                 });
-        }
-       
+        }*/
         $scope.logout = function () {
             console.log("Logging out from the app");
             $ionicLoading.show({
                 template: 'Logging Out...'
             });
-
-            $rootScope.schoolID    = undefined;
-            $rootScope.group       = undefined;
-            $rootScope.advisor     = undefined;
-            $rootScope.prospect    = undefined;
-            $rootScope.userID      = undefined;
-            $rootScope.displayName = undefined;
-
             Auth.$unauth();
         }
        
   
 }])
-/*
-setting for applicant
-*/
-.controller('SettingsCtrl', ['$scope', '$rootScope','Users', 'ChangePassword', '$state', '$ionicLoading', '$ionicModal', 'Auth',
-    function ($scope, $rootScope, Users, ChangePassword, $state, $ionicLoading, $ionicModal, Auth) {
-    console.log('settings initialized');
-    
-    $scope.deleteAccount = function(){
-                $ionicModal.fromTemplateUrl('templates/delete-account.html', {
-                    scope: $scope
-                }).then(function (modal) {
-                    $scope.modal = modal;
-                    $scope.modal.show();
-                });
-        }
 
-    $scope.logout = function () {
-            console.log("Logging out from the app");
-            $ionicLoading.show({
-                template: 'Logging Out...'
-            });
-
-            $rootScope.advisor      = undefined;
-            $rootScope.prospect     = undefined;
-            $rootScope.userID       = undefined;
-            $rootScope.displayName  = undefined;
-            $rootScope.email        = undefined;
-            $rootScope.organization = undefined;
-
-            Auth.$unauth();
-    }
-       
-    $scope.runChangePassword = function(user){
-            ChangePassword.change(user);
-    }
-}])
 /*
 * opens the private chat room
 */
@@ -441,6 +421,7 @@ setting for applicant
         displayName         = $state.params.displayName,
         email               = $state.params.email,
         group               = $state.params.group,
+        who                 = $state.params.who,
         toggleUserID        = '',
         toggleQuestionID    = '',
         firstMessage        = false;
@@ -468,21 +449,21 @@ setting for applicant
       });
     }
     
-        if(!!$scope.schoolID){
-            toggleUserID     = prospectUserID;
-            toggleQuestionID = prospectQuestionID;
-        }else{
+        if(who === 'asker'){
             toggleUserID     = advisorID;
             toggleQuestionID = advisorKey;
+        }else{
+            toggleUserID     = prospectUserID;
+            toggleQuestionID = prospectQuestionID;
         }
-        if(!!schoolsQuestionID){
+
+        if(!advisorKey){
             firstMessage=true;
         }
        
         $scope.question = $state.params.question;
         //console.log('id',advisorID, 'key', advisorKey);
         Chats.selectRoom(schoolID, advisorID, advisorKey);
-
 
     Chats.getSelectedRoomName(function(roomName){
     // Fetching Chat Records only if a Room is Selected
@@ -504,6 +485,11 @@ setting for applicant
             Chats.send($scope.displayName, schoolID, msg, toggleUserID, toggleQuestionID);
             $scope.IM.textMessage = "";
         }else{//first time an advisor asnwers a question
+               if($scope.displayName === displayName){
+                    alert('No need to answer your own question.');
+
+                    return;
+                }
                 $ionicLoading.show({
                     template: 'Sending...'
                 });
@@ -553,15 +539,15 @@ setting for applicant
                 }).catch (function(error){
                     alert('error sending message: ' + error);
                 })
-                        
+              
         }
-        RequestsService.pushNote(
+        /*RequestsService.pushNote(
             {
              'message':'Message from: ' + $scope.displayName,
              'userID': toggleUserID,
              'method':'GET',
              'path':'push'
-            });
+            });*/
 
     }
 //removes a single chat message
@@ -584,15 +570,10 @@ setting for applicant
                                 group
                             );
        if(typeof val !== "string"){
-            if(!!$scope.schoolID){
-                $scope.modal.hide();
-                $state.go('menu.tab.student', {
-                    schoolID: schoolID
-                });
-            }else{
-                 $scope.modal.hide();
-                 $state.go('menu.tab.ask');
-            }
+            $scope.modal.hide();
+            $state.go('menu.tab.student', {
+                schoolID: schoolID
+            });          
        }else{
             alert(val);
        }
@@ -608,41 +589,7 @@ setting for applicant
     }
 
 }])
-/*this is the prospects view room
-*
-*/
-.controller('ProspectCtrl', ['$scope', 'Users', '$state', function ($scope, Users, $state) {
-    console.log("Rooms Controller initialized");
-    if(!$scope.userID){
-        $scope.userID = Users.getIDS('userID');
-    }
 
-    var q = Users.getUserByID($scope.userID);
-    q.$loaded(function(data){
-        $scope.rooms = data;
-    })
-    
-    $scope.openChatRoom = function (advisorID, schoolID, question, advisorKey, prospectQuestionID) {
-        
-        if(!!advisorID){
-            $state.go('menu.tab.chat', {
-                advisorID: advisorID,
-                schoolID: schoolID,
-                advisorKey: advisorKey,
-                prospectUserID: $scope.userID, //
-                prospectQuestionID: prospectQuestionID, //
-                schoolsQuestionID: '',
-                question: question,
-                displayName: '',
-                email: $scope.email,
-                group: '' 
-            });
-            Users.toggleQuestionBackAfterClick($scope.userID, prospectQuestionID);
-        }else{
-            alert('question has not been answered yet');
-        }
-    }
-}])
 /*the advisor see private questions and open chat
 *
 */
@@ -660,21 +607,60 @@ setting for applicant
          $scope.rooms = data;
          
      });
-    $scope.openChatRoom = function (question, advisorKey, prospectUserID, prospectQuestionID, email) {
+    $scope.askQuestion = function(){
+        $state.go('menu.tab.ask');
+    }
+    $scope.openChatRoom = function (advisorID, schoolID, question, advisorKey, selfKey, prospectUserID, email, prospectQuestionID1) {
         //TODO: toggle conversationStarted to false
-        $state.go('menu.tab.chat', {
-            advisorID: $scope.userID,
-            schoolID: $scope.schoolID,
-            advisorKey: advisorKey,
-            prospectUserID: prospectUserID,
-            prospectQuestionID: prospectQuestionID,
-            schoolsQuestionID: '',
-            question: question,
-            displayName: '',
-            email: email,
-            group: ''   
-        });
-        Users.toggleQuestionBackAfterClick($scope.userID, advisorKey);
+        if(!advisorID){
+            if(!prospectUserID){
+                alert('your question has not been answered yet');
+
+                return;
+            }
+        }
+        if(!!prospectUserID){//question answerer
+            /*the advisorKey and advisorID are not params
+                Instead they are stored in scope when the question answerer logs in
+                prospectQuestionID is the original key that is in the school and is retrieved 
+                like room.$id
+            */
+            $state.go('menu.tab.chat', {
+                advisorID: $scope.userID,
+                schoolID: $scope.schoolID,
+                advisorKey: selfKey,//name.$id get self key
+                prospectUserID: prospectUserID,
+                prospectQuestionID: prospectQuestionID1,//get the prospects added question key
+                schoolsQuestionID: '',
+                question: question,
+                displayName: '',
+                email: email,
+                group: '',
+                who: 'answerer'   
+            });
+            Users.toggleQuestionBackAfterClick($scope.userID, selfKey);//toggle back own question name.$id
+        }
+
+        if(!!advisorID){ //question asker -- response return
+            /*when advisor adds their advisorID and advisorKey, the asker can chat 
+            because the question has been answered
+            */
+            $state.go('menu.tab.chat', {
+                advisorID: advisorID,
+                schoolID: schoolID,
+                advisorKey: advisorKey,
+                prospectUserID: $scope.userID, //
+                prospectQuestionID: selfKey, //name.$id to get self key
+                schoolsQuestionID: '',
+                question: question,
+                displayName: '',
+                email: $scope.email,
+                group: '',
+                who: 'asker'
+
+            });
+            Users.toggleQuestionBackAfterClick($scope.userID, selfKey);//toggle back own question name.$id
+        }
     }
 }])
 
@@ -684,15 +670,20 @@ setting for applicant
 .controller('AdvisorCtrl', ['$scope', '$rootScope', 'Users', 'Chats', 'Rooms', '$state', '$window', 
     function ($scope, $rootScope, Users, Chats, Rooms, $state, $window) {
     console.log("Student Controller initialized");
-    if(!$scope.userID){
-        $scope.userID = Users.getIDS('userID');
-    }
+    
     if(!$scope.schoolID){
         $scope.schoolID = Users.getIDS('schoolID');
+    }
+    if(!$scope.userID){
+        $scope.userID = Users.getIDS('userID');
     }
     if(!$scope.group){
         $scope.groupID = Users.getIDS('groupID').groupID;
     }
+    $scope.askQuestion = function(){
+        $state.go('menu.tab.ask');
+    }
+
     $scope.$watch('group', function(oldValue, newValue){
         var val;
         if(!!oldValue){
@@ -700,6 +691,7 @@ setting for applicant
         }else{
             val = newValue;
         }
+
         $scope.groupID = val.groupID;
         $scope.title1 = val.groupName;
         $scope.school = Rooms.getSchoolBySchoolID($scope.schoolID, $scope.groupID);
@@ -721,7 +713,8 @@ setting for applicant
             question: question,
             displayName: displayName,
             email: email,
-            group: $scope.groupID
+            group: $scope.groupID,
+            who: 'answerer'
         });
     }
  
@@ -729,61 +722,35 @@ setting for applicant
 /*the prospect can ask a question
 *
 */
-.controller('AskCtrl', ['$scope', '$state', 'Users', 'Rooms', 'SchoolDataService', 'groupsFormDataService','stripDot', '$ionicLoading', '$http', 'Questions',
-    function ($scope, $state, Users, Rooms, SchoolDataService, groupsFormDataService, stripDot, $ionicLoading, $http, Questions){
+.controller('AskCtrl', ['$scope', '$state', 'Users', 'Rooms', 'groupsMentorsDataService', 'stripDot', '$ionicLoading', '$http', 'Questions',
+    function ($scope, $state, Users, Rooms, groupsMentorsDataService, stripDot, $ionicLoading, $http, Questions){
     var icon='',
         grpID,
         grpName;
     if(!$scope.userID){
         $scope.userID = Users.getIDS('userID');
     }
+    if(!$scope.schoolID){
+        $scope.schoolID = Users.getIDS('schoolID');
+    }
     if(!$scope.displayName){
         $scope.displayName = Users.getIDS('displayName');
     }
 
     $scope.user = {}
-    $scope.data = { 'list' : '', 'search' : '', 'groups': '', 'listg':''};
+    $scope.data = { 'listg' : '', 'search' : '', 'groups': ''};
 
-    $scope.search = function() {
-        SchoolDataService.searchSchools($scope.data.search).then(
-            function(matches) {
-                $scope.data.groups = null;
-                if(!!$scope.data.listg){
-                    $scope.data.listg = null;
-                }
-                
-                $scope.user.schoolID = matches[0];
-                $scope.data.list = matches;
-                if(!!$scope.user.schoolID && !!$scope.user.schoolID.schoolID){
-                    groupsFormDataService.retrieveDataSort($scope.user.schoolID.schoolID);
-                }
-                if(!!$scope.user.schoolID && !!$scope.user.schoolID.schoolContact !== undefined){
-                    $scope.hasEmail = true;
-                }
-                
-            }
-        )
-    }
-    $scope.update = function (data){
-        $scope.data.groups = null;
-        if(!!$scope.data.listg){
-           $scope.data.listg = null;
-        }
-        groupsFormDataService.retrieveDataSort(data.schoolID);
-        if(!!data && data.schoolContact){
-            //show the checkbox to send email if school has one
-            $scope.hasEmail = true;
-        } 
-    }
+   
    $scope.searchg = function() {
-     if(!!$scope.data.list){
-        groupsFormDataService.groupList($scope.data.groups).then(
-            function(matches) {
-                $scope.user.group = matches[0];
-                $scope.data.listg = matches;
-            }
-        )
-      }
+     groupsMentorsDataService.retrieveDataSort($scope.data.groups, function(promise){
+                promise.then(
+                    function(matches) {
+                        $scope.user.group = matches[0];
+                        $scope.data.listg = matches;  
+                    //console.log($rootScope.group);     
+                    }
+                )
+            });
     }
   
     $scope.ask = function (quest){         
@@ -793,22 +760,21 @@ setting for applicant
           }   
           grpID = quest.group.groupID;
           grpName = quest.group.groupName;
-            if(!!quest.schoolID){
                 if(quest.question.amount >= 15){
                     $ionicLoading.show({
                         template: 'Sending...'
                     });
                 
                      Users.addQuestionToUser(
-                            quest.schoolID.schoolID, 
+                            $scope.schoolID, 
                             $scope.userID, 
                             quest.question.value,
-                            'ion-chatbubbles',
+                            'ion-help-circled',
                             false,
                             false
                         ).then(function(data){
                             Rooms.addQuestionsToSchool(
-                                quest.schoolID.schoolID, 
+                                $scope.schoolID, 
                                 $scope.userID,
                                 quest.question.value,
                                 'ion-chatbubbles', 
@@ -819,47 +785,26 @@ setting for applicant
                                 grpName 
                             ).then(function(){
                                 $ionicLoading.hide();
-                                $state.go('menu.tab.newest');
+                                $state.go('menu.tab.studentc');
                                 $scope.data.search = '';
                                 $scope.user.question = '';
                         });
                     });
 
-                    if(quest.isChecked){
-                        var data = {
-                                emailFrom: $scope.email,
-                                schoolContact: quest.schoolContact,
-                                question: quest.question.value
-                        };
-                        $http({
-                            method: 'POST',
-                            url: 'http://www.theopencircles.com/opencircles/emailToSchool.php', 
-                            data: data
-                        })
-                        .success(function(data, status, headers, config)
-                        {
-                            console.log(status + ' - ' + data);
-                        })
-                        .error(function(data, status, headers, config)
-                        {
-                            console.log('error');
-                        });
-                    }
                     Questions.save({
-                        question: quest.question.value, 
-                        organization: $scope.organization, 
-                        school: quest.schoolID.schoolname
+                        question: quest.question.value,
+                        school: $scope.schoolID
                     }); 
-                    var keys = Users.getGroupKeys().
+                    if(grpID !== 'gen'){
+                       /*var keys = Users.getGroupKeys().
                             then(function(data){
-                                Users.sendPushByGroup(data, grpID, quest.schoolID.schoolID, grpName);
-                            });
+                                Users.sendPushByGroup(data, grpID, $scope.schoolID, grpName);
+                            });*/ 
+                    }
 
                 }else{
                     alert('questions must be at least 15 characters long');
                 }
-            }else{
-                alert('please select a school');
-            }
+            
     }
 }]);

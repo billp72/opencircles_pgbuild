@@ -12,4 +12,32 @@
         </ion-list>
         <ion-item class="textCenter" ng-model="message">You have {{rooms.length}} question(s)</ion-item>
     </ion-content>
+    <div class="float-button1" style="
+          background-color:#303f9f;
+          opacity: 0.9;
+          color: white;
+          border-radius: 50%;
+          width: 30px;
+          padding: 25px;
+          font-size: 40px;
+          position: fixed;
+          bottom: 5%;
+          right: 5%;
+          z-index: 1000;
+          ">
+        <span class="height-fix1" ng-click="askQuestion()">
+            <a class="content" style="
+                position: absolute;
+                left: 0;
+                top: 69%;
+                height: 100%;
+                width: 100%;
+                text-align: center;
+                margin-top: -20px;
+                color: white;
+            ">
+                <i class="ion-ios-arrow-up">?</i>
+            </a>
+         </span>
+    </div>
 </ion-view>

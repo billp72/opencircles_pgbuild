@@ -15,7 +15,7 @@ angular.module('mychat.services', ['firebase'])
     var processProspectEmailRequest = function (data){
         $http({
             method: 'POST',
-            url: 'http://www.theopencircles.com/opencircles/emailToApplicant.php', 
+            url: 'http://www.theopencircles.com/opencircles/emailToApplicant_reddel.php', 
             data: data
         })
         .success(function(data, status, headers, config)
@@ -167,6 +167,9 @@ angular.module('mychat.services', ['firebase'])
             
             return $firebase(ref.child(schoolID).child('questions').child(groupID)).$asArray();
         },
+        checkSchoolExist: function(schoolID){
+            return $firebase(ref.child(schoolID).child('questions')).$asArray();
+        },
         addQuestionsToSchool: function(schoolID, userID, question, icon, questionID, displayName, email, groupID, groupName){
             var qdata = {
                 schoolID: schoolID,
@@ -191,7 +194,7 @@ angular.module('mychat.services', ['firebase'])
 /**
  * simple service to get all the users for a room or in the db
 */
-.factory('Users', ['$firebase', '$q','$timeout', '$window', 'Rooms', 'RequestsService', function ($firebase, $q, $timeout, $window, Rooms, RequestsService) {
+.factory('Users', ['$firebase', '$q','$timeout', '$window', 'Rooms', 'RequestsService', 'stripDot', function ($firebase, $q, $timeout, $window, Rooms, RequestsService, stripDot) {
     // Might use a resource here that returns a JSON array
     var ref = new Firebase(firebaseUrl+'/users');
     var users = $firebase(ref).$asArray();
@@ -228,6 +231,22 @@ angular.module('mychat.services', ['firebase'])
         updateUserGroup: function (groupID, groupName, userID){
             ref.child(userID).child('user').update({'groupID': groupID, 'groupName': groupName});
         },
+        /*part of add/edit group*/
+        addGroupKey: function (userID, groupKey, groupName, groupID){
+            var refGroups = ref.child(userID).child('user').child('groups');
+            var groups = $firebase(ref.child(userID).child('user').child('groups')).$asArray();
+                groups.$loaded(function(data){
+                    if(!!data && data.length){
+                        data.$add({'groupName': groupName, 'groupKey':groupKey, 'groupID':groupID});
+                   
+                    }else{
+                        refGroups.push({'groupName': groupName, 'groupKey':groupKey, 'groupID':groupID});
+                    }
+                })
+        },
+        getAllGroups: function (userID){
+            return $firebase(ref.child(userID).child('user').child('groups')).$asArray();
+        },
         getUserConversation: function (userID, questionID){
             return $firebase(ref.child(userID).child('questions').child(questionID).child('conversations')).$asArray();
         },
@@ -253,6 +272,78 @@ angular.module('mychat.services', ['firebase'])
                 };
             return user.$add(chatMessage);
        },
+       /*part of add/edit group*/
+       createGroups: function (schoolID, groupName, cb){
+            var ref = new Firebase(firebaseUrl+'/groups/schools');
+            var arr = $firebase(ref.child(schoolID)).$asArray();
+            var deferred = $q.defer();
+            var added;
+
+            arr.$loaded(function(data){
+                if(!!data && data.length){
+                    var groupID = stripDot.generatePass();
+                    arr.$add({'groupName':groupName, 'groupID': groupID}).then(function(data){
+                            $timeout( function(){
+        
+                                deferred.resolve({
+                                    key: function(){ 
+                                        return {
+                                            'groupKey': data.key(),
+                                            'groupID': groupID
+                                        }
+                                    }
+
+                                });
+
+                            }, 200);
+
+                        cb(deferred.promise);
+                    });
+                }else{
+                    var groupID = stripDot.generatePass();
+                    var newGroup = ref.child(schoolID);
+                    var newRef = newGroup.push();
+                        newRef.set({'groupName':groupName, 'groupID': groupID});
+
+                        $timeout( function(){
+        
+                            deferred.resolve({
+                                key: function(){ 
+                                    return {
+                                        'groupKey': newRef.key(),
+                                        'groupID': groupID
+                                    }
+                                }
+
+                            });
+
+                        }, 200);
+
+                    cb(deferred.promise);
+                }
+            });
+            
+       },
+       /*part of add/edit group - this deletes the group
+       editGroup: function (key, schoolID, userID, name){
+            var refgrp = new Firebase(firebaseUrl+'/groups/schools');
+            refgrp.child(schoolID).child(key).remove(
+                    function(err){
+                        if(err){
+                            alert(err + 'could not complete request');
+                        }else{
+                            ref.child(userID).child('user').child('groupKey').remove(
+                                    function(error){
+                                        if(!error){
+                                            alert('group '+name+' deleted');
+                                        }
+                                    }
+                            );
+                        }
+                    }
+                );
+
+       },*/
        updateProspectQuestion: function (studentID, questionID, advisorID, advisorKey, originalID, schoolID, groupID){
             var update = ref.child(studentID).child('questions').child(questionID);
                 update.update({advisorID: advisorID, advisorKey: advisorKey, conversationStarted: true});
@@ -329,6 +420,14 @@ angular.module('mychat.services', ['firebase'])
                     password += possibleChars[Math.floor(Math.random() * possibleChars.length)];
             }
             return password;
+        },
+        shortRandom: function (){
+            var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?_-'.split('');
+            var ch = '';
+             for(var i = 0; i < 3; i += 1) {
+                    ch += possibleChars[Math.floor(Math.random() * chars.length)];
+            }
+            return ch;
         }
     }
 }])
@@ -473,6 +572,7 @@ angular.module('mychat.services', ['firebase'])
                 "ecb":"window.onNotificationGCM"
              }
         );
+        q.resolve('android')
       }else{
         pushNotification.register(
             tokenHandler,
@@ -484,6 +584,7 @@ angular.module('mychat.services', ['firebase'])
                 "ecb":"window.onNotificationAPN"
             }
         );
+        q.resolve('ios');
       }
       return q.promise;
     }

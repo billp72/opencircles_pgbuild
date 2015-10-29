@@ -4,7 +4,7 @@
 <widget xmlns     = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
         id        = "com.theopencircles.com.opencircles"
-        version   = "1.5.1">
+        version   = "1.5.3">
 
     <name>Open Circles</name>
 
@@ -40,6 +40,8 @@
     <preference name="SplashScreen"               value="screen" />
     <preference name="SplashScreenDelay"          value="3000" />
     <preference name="phonegap-version"           value="cli-5.2.0" />
+    <!-- ios 7 overlay not on start up-->
+    <preference name="StatusBarOverlaysWebView" value="false" />
     <!--
         Define a specific version of PhoneGap to build into your app.
         <preference name="phonegap-version"       value="3.5.0" />
@@ -69,6 +71,7 @@
     <gap:plugin name="org.apache.cordova.splashscreen" source="npm" />
     <gap:plugin name="org.apache.cordova.vibration" source="npm" />
     <gap:plugin name="cordova-plugin-whitelist" source="npm" />
+    <gap:plugin name="cordova-plugin-statusbar" source="npm" />
 
     <!-- Third party plugins -->
     <!-- A list of available plugins are available at https://build.phonegap.com/plugins -->
@@ -77,7 +80,7 @@
     -->
 
     <!-- Define app icon for each platform. -->
-    <icon src="icon.png" />
+    <!--<icon src="icon.png" />-->
     <icon src="res/icon/android/icon-36-ldpi.png"   gap:platform="android"    gap:qualifier="ldpi" />
     <icon src="res/icon/android/icon-48-mdpi.png"   gap:platform="android"    gap:qualifier="mdpi" />
     <icon src="res/icon/android/icon-72-hdpi.png"   gap:platform="android"    gap:qualifier="hdpi" />
@@ -94,7 +97,7 @@
    <!-- <icon src="res/icon/webos/icon-64.png"          gap:platform="webos" />-->
 
     <!-- Define app splash screen for each platform. -->
-    <gap:splash src="splash.png" />
+    <!--<gap:splash src="splash.png" />-->
     <gap:splash src="res/screen/android/drawable-port-ldpi.png"       gap:platform="android" gap:qualifier="port-ldpi" />
     <gap:splash src="res/screen/android/drawable-port-mdpi.png"       gap:platform="android" gap:qualifier="port-mdpi" />
     <gap:splash src="res/screen/android/drawable-port-hdpi.png"       gap:platform="android" gap:qualifier="port-hdpi" />

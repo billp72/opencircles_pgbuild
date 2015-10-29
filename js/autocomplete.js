@@ -54,63 +54,6 @@ angular.module('mychat.autocomplete', ['firebase'])
     }
 }])
 /*
-* autocomplete search schools when applicant is asking a question
-*/
-.factory('SchoolDataService', ['$q', '$timeout', 'schoolData', function ($q, $timeout, schoolData) {
-        var datas = schoolData.all();
-        var schools='';
-        datas.$loaded(function(data){
-            schools = data.sort(function(a, b) {
-
-                var schoolA = a.schoolname.toLowerCase();
-                var schoolB = b.schoolname.toLowerCase();
-
-                if(schoolA > schoolB) return 1;
-                if(schoolA < schoolB) return -1;
-
-                return 0;
-            });
-        });
-            var searchSchool = function(searchFilter) {    
-            //console.log('Searching school for ' + searchFilter);
-            var deferred = $q.defer();
-
-            var matches = schools.filter( function(school) {
-                if(school.schoolname.toLowerCase().indexOf(searchFilter.toLowerCase()) !== -1 ) return true;
-            })
-
-            $timeout( function(){
-        
-                deferred.resolve( matches );
-
-            }, 100);
-
-            return deferred.promise;
-
-        };
-
-    return {
-
-        searchSchools : searchSchool
-
-    }
-}])
-/*
-*get school data for applicant asking
-*/
-.factory('schoolData', ['$firebase', function ($firebase){
-
-    var ref = new Firebase(firebaseUrl+'/schools');
-    var schools = $firebase(ref).$asArray();
-
-    return{
-        all: function(){
-            return schools
-        }
-    }
-     
-}])
-/*
 * FOR ALL GROUP SEARCHES
 * this is for mentors to choose a group
 */
@@ -150,12 +93,97 @@ angular.module('mychat.autocomplete', ['firebase'])
         retrieveDataSort: retrieveDataSort
     }
 }])
+/*
+*get groups data
+*/
+.factory('groupsMentorData', ['$firebase', function ($firebase){
+    var groups='';
+    var allGroups='';
+    var ref = new Firebase(firebaseUrl+'/groups');
+
+    return{
+        getGroupByID: function (schoolID, cb){
+           groups = $firebase(ref.child('schools').child(schoolID)).$asArray();
+           this.getGroupsGeneral(cb);
+        },
+        getGroupsGeneral: function (cb){
+            groups.$loaded(function(data){
+                var general = $firebase(ref.child('general')).$asArray();
+                    general.$loaded(function(grp){
+                        if(!!data && data.length > 0){
+                            allGroups = grp.concat(data);
+                            cb(allGroups);
+                        }else{
+                            cb(grp);
+                        }
+                        
+                    });
+            })
+        }
+    }
+     
+}]);
+/*
+
+.factory('SchoolDataService', ['$q', '$timeout', 'schoolData', function ($q, $timeout, schoolData) {
+        var datas = schoolData.all();
+        var schools='';
+        datas.$loaded(function(data){
+            schools = data.sort(function(a, b) {
+
+                var schoolA = a.schoolname.toLowerCase();
+                var schoolB = b.schoolname.toLowerCase();
+
+                if(schoolA > schoolB) return 1;
+                if(schoolA < schoolB) return -1;
+
+                return 0;
+            });
+        });
+            var searchSchool = function(searchFilter) {    
+            //console.log('Searching school for ' + searchFilter);
+            var deferred = $q.defer();
+
+            var matches = schools.filter( function(school) {
+                if(school.schoolname.toLowerCase().indexOf(searchFilter.toLowerCase()) !== -1 ) return true;
+            })
+
+            $timeout( function(){
+        
+                deferred.resolve( matches );
+
+            }, 100);
+
+            return deferred.promise;
+
+        };
+
+    return {
+
+        searchSchools : searchSchool
+
+    }
+}])
+
+.factory('schoolData', ['$firebase', function ($firebase){
+
+    var ref = new Firebase(firebaseUrl+'/schools');
+    var schools = $firebase(ref).$asArray();
+
+    return{
+        all: function(){
+            return schools
+        }
+    }
+     
+}])
+*/
 
 /*
 * this is to populate the form with groups when the user is asking a question
 
 */
-.factory('groupsFormDataService', ['$q', '$timeout', 'groupsMentorData', 'Users',
+/*.factory('groupsFormDataService', ['$q', '$timeout', 'groupsMentorData', 'Users',
     function ($q, $timeout, groupsMentorData, Users){
         var schools='';
         var retrieveDataSort = function(schoolID){
@@ -194,35 +222,6 @@ angular.module('mychat.autocomplete', ['firebase'])
             retrieveDataSort: retrieveDataSort
 
         }
-}])
-/*
-*get groups data
-*/
-.factory('groupsMentorData', ['$firebase', function ($firebase){
-    var groups='';
-    var allGroups='';
-    var ref = new Firebase(firebaseUrl+'/groups');
+}])*/
 
-    return{
-        getGroupByID: function (schoolID, cb){
-           groups = $firebase(ref.child('schools').child(schoolID)).$asArray();
-           this.getGroupsGeneral(cb);
-        },
-        getGroupsGeneral: function (cb){
-            groups.$loaded(function(data){
-                var general = $firebase(ref.child('general')).$asArray();
-                    general.$loaded(function(grp){
-                        if(!!data && data.length > 0){
-                            allGroups = grp.concat(data);
-                            cb(allGroups);
-                        }else{
-                            cb(grp);
-                        }
-                        
-                    });
-            })
-        }
-    }
-     
-}])
 

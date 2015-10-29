@@ -1,6 +1,6 @@
 // MyChat App - Ionic & Firebase Demo
 
-var firebaseUrl = "https://incandescent-torch-5679.firebaseio.com";
+var firebaseUrl = "https://reddel.firebaseio.com";
 
 function onDeviceReady() {
     setTimeout(function() { 
@@ -24,10 +24,6 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
     $ionicPlatform.ready(function () {
          //localstorage check
 
-        $rootScope.advisor   =  !!JSON.parse($window.localStorage.getItem('advisor')) ?
-                JSON.parse($window.localStorage.getItem('advisor')) : false;
-        $rootScope.prospect  =  !!JSON.parse($window.localStorage.getItem('prospect')) ?
-                JSON.parse($window.localStorage.getItem('prospect')) : false;
         // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
          /*Google keys
           * key: AIzaSyAbXzuAUk1EICCdfpZhoA6-TleQrPWxJuI
@@ -117,17 +113,6 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
             }
         }
     })
-    // Each tab has its own nav history stack:
-    //menu.tab.newest and student show current questions for both HS and college
-    .state('menu.tab.newest', {
-        url: '/rooms',
-        views: {
-            'tab-rooms': {
-                templateUrl: 'templates/tab-rooms.html',
-                controller: 'ProspectCtrl'
-            }
-        }
-    })
     .state('menu.tab.ask', {
         url: '/ask',
         views: {
@@ -155,15 +140,6 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
             }
         }
     })
-    .state('menu.tab.settings', {
-        url: '/settings',
-        views: {
-            'tab-settings': {
-                templateUrl: 'templates/tab-settings.html',
-                controller: 'SettingsCtrl'
-            }
-        }
-    })
     .state('menu.tab.settingsMentor', {
         url: '/settingsMentor',
         views: {
@@ -174,7 +150,7 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
         }
     })
      .state('menu.tab.chat', {
-        url: '/chat/:advisorID/:schoolID/:advisorKey/:prospectUserID/:prospectQuestionID/:schoolsQuestionID/:question/:displayName/:email/:group',
+        url: '/chat/:advisorID/:schoolID/:advisorKey/:prospectUserID/:prospectQuestionID/:schoolsQuestionID/:question/:displayName/:email/:group/:who',
         views: {
             'tab-chat':{
                 templateUrl: 'templates/tab-chat.html',
