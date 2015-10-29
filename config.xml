@@ -4,7 +4,7 @@
 <widget xmlns     = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
         id        = "com.theopencircles.com.opencircles"
-        version   = "1.5.4">
+        version   = "1.5.5">
 
     <name>Open Circles</name>
 
@@ -41,7 +41,7 @@
     <preference name="SplashScreenDelay"          value="3000" />
     <preference name="phonegap-version"           value="cli-5.2.0" />
     <!-- ios 7 overlay not on start up-->
-    <preference name="StatusBarOverlaysWebView" value="true" />
+    <!--<preference name="StatusBarOverlaysWebView" value="true" />-->
     <!--
         Define a specific version of PhoneGap to build into your app.
         <preference name="phonegap-version"       value="3.5.0" />
@@ -71,7 +71,7 @@
     <gap:plugin name="org.apache.cordova.splashscreen" source="npm" />
     <gap:plugin name="org.apache.cordova.vibration" source="npm" />
     <gap:plugin name="cordova-plugin-whitelist" source="npm" />
-    <gap:plugin name="cordova-plugin-statusbar" source="npm" />
+    <!--<gap:plugin name="cordova-plugin-statusbar" source="npm" />-->
 
     <!-- Third party plugins -->
     <!-- A list of available plugins are available at https://build.phonegap.com/plugins -->
@@ -97,7 +97,7 @@
    <!-- <icon src="res/icon/webos/icon-64.png"          gap:platform="webos" />-->
 
     <!-- Define app splash screen for each platform. -->
-    <!--<gap:splash src="splash.png" />-->
+    <gap:splash src="splash.png" />
     <gap:splash src="res/screen/android/drawable-port-ldpi.png"       gap:platform="android" gap:qualifier="port-ldpi" />
     <gap:splash src="res/screen/android/drawable-port-mdpi.png"       gap:platform="android" gap:qualifier="port-mdpi" />
     <gap:splash src="res/screen/android/drawable-port-hdpi.png"       gap:platform="android" gap:qualifier="port-hdpi" />
