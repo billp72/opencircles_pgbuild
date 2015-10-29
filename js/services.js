@@ -425,7 +425,7 @@ angular.module('mychat.services', ['firebase'])
             var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!?_-'.split('');
             var ch = '';
              for(var i = 0; i < 3; i += 1) {
-                    ch += possibleChars[Math.floor(Math.random() * chars.length)];
+                    ch += chars[Math.floor(Math.random() * chars.length)];
             }
             return ch;
         }
