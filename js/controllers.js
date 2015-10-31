@@ -541,13 +541,13 @@ settings for mentor
                 })
               
         }
-        /*RequestsService.pushNote(
+        RequestsService.pushNote(
             {
              'message':'Message from: ' + $scope.displayName,
              'userID': toggleUserID,
              'method':'GET',
              'path':'push'
-            });*/
+            });
 
     }
 //removes a single chat message
@@ -796,10 +796,10 @@ settings for mentor
                         school: $scope.schoolID
                     }); 
                     if(grpID !== 'gen'){
-                       /*var keys = Users.getGroupKeys().
+                        Users.getGroupKeys().
                             then(function(data){
                                 Users.sendPushByGroup(data, grpID, $scope.schoolID, grpName);
-                            });*/ 
+                            }); 
                     }
 
                 }else{
