@@ -771,7 +771,10 @@ settings for mentor
                             quest.question.value,
                             'ion-help-circled',
                             false,
-                            false
+                            false,
+                            false,
+                            false,
+                            grpName
                         ).then(function(data){
                             Rooms.addQuestionsToSchool(
                                 $scope.schoolID, 

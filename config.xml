@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<!-- odd version numbers are ios for statusbar overlay. Even are Android-->
 <!-- config.xml reference: https://build.phonegap.com/docs/config-xml -->
 <widget xmlns     = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
         id        = "com.theopencircles.com.opencircles"
-        version   = "1.6.0">
+        version   = "1.6.1">
 
     <name>Open Circles</name>
 
