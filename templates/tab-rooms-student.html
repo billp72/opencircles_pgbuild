@@ -4,10 +4,10 @@
         </ion-nav-title>
     <ion-content>
         <ion-list ng-show="rooms" class="display-text">
-            <ion-item class="item-icon-left" ng-repeat="room in rooms | orderBy:reverse" type="item-text-wrap" ng-click="openChatRoom(room.question, room.userID, room.questionID, room.$id, room.displayName, room.email)">
+            <ion-item class="item-icon-left" ng-repeat="room in rooms | orderBy:reverse" type="item-text-wrap" ng-click="openChatRoom(room.question, room.userID, room.questionID, room.$id, room.displayName, room.email, room.status)">
                 <i class="icon {{room.icon}}"></i>
                 <h2>{{room.question}}</h2>
-                <h4 class="displayname">{{room.displayName}}</h4>
+                <h4 class="displayname"><span>{{room.status}}</span> {{room.displayName}}</h4>
             </ion-item>
         </ion-list>
         <ion-item class="textCenter" ng-model="message">You have {{rooms.length}} question(s)</ion-item>

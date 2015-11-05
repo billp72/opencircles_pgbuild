@@ -589,7 +589,125 @@ settings for mentor
     }
 
 }])
+/*
+* opens the public chat room
+*
+*/
+.controller('PublicChatCtrl', ['$scope', 'PublicChat', 'Users', '$state', '$window', '$ionicLoading', '$ionicModal', '$ionicScrollDelegate', '$timeout', 'RequestsService',
+    function ($scope, PublicChat, Users, $state, $window, $ionicLoading, $ionicModal, $ionicScrollDelegate, $timeout, RequestsService) {
+    //console.log("Chat Controller initialized");
+    var 
+        prospectUserID      = $state.params.prospectUserID,
+        prospectQuestionID  = $state.params.prospectQuestionID,
+        schoolsQuestionID   = $state.params.schoolsQuestionID,
+        displayName         = $state.params.displayName,
+        group               = $state.params.group,
+        wrap                = $state.params.wrap,
+        toggleUserID        = '',
+        toggleQuestionID    = '',
+        firstMessage        = false;
 
+    if(!$scope.schoolID){
+        $scope.schoolID = Users.getIDS('schoolID');
+    }
+    if(!$scope.displayName){
+        $scope.displayName = Users.getIDS('displayName');
+    }
+    $scope.IM = {
+        textMessage: ""
+    };
+    if(!wrap){
+        $scope.wontWrap = true;
+    }else{
+        $scope.wontWrap = false;
+    }
+    var txtInput;
+    $timeout(function(){
+        footerBar = document.body.querySelector('#userMessagesView .bar-footer');
+        txtInput = angular.element(footerBar.querySelector('input'));
+    },0);
+    var viewScroll = $ionicScrollDelegate.$getByHandle('userMessageScroll');
+    function keepKeyboardOpen() {
+      //console.log('keepKeyboardOpen');
+      txtInput.one('blur', function() {
+        //console.log('textarea blur, focus back on it');
+        txtInput[0].focus();
+      });
+    }
+    
+       
+        toggleUserID     = prospectUserID;
+        toggleQuestionID = prospectQuestionID;
+        
+       
+        $scope.question = $state.params.question;
+        //console.log('id',advisorID, 'key', advisorKey);
+        PublicChat.selectRoom($scope.schoolID, schoolsQuestionID, group);
+
+    PublicChat.getSelectedRoomName(function(roomName){
+    // Fetching Chat Records only if a Room is Selected
+        if (roomName) {
+            $scope.roomName = " - " + roomName;
+            $scope.chats = PublicChat.all($scope.displayName);
+            $scope.$watch('chats', function(newValue, oldValue){
+                $timeout(function() {
+                    keepKeyboardOpen();
+                    viewScroll.scrollBottom();
+                }, 0);
+        
+            },true);
+            
+        }
+    });
+    $scope.sendMessage = function (msg) {
+        if(!firstMessage){
+            PublicChat.send($scope.displayName, $scope.schoolID, msg, toggleQuestionID, toggleUserID);
+            $scope.IM.textMessage = "";
+        }else{
+
+         /*RequestsService.pushNote(
+            {
+                'message':'Message from: ' + $scope.displayName,
+                'userID': toggleUserID,
+                'method':'GET',
+                'path':'push'
+            });*/
+        }
+    }
+//removes a single chat message
+    $scope.remove = function (chat, index) {
+        PublicChat.remove(chat);
+    }
+//remove question/conversation once dialog is confirmed
+    $scope.removePerm = function () {
+
+       var val = PublicChat.wrapitup( 
+                                $scope.schoolID, 
+                                schoolsQuestionID, 
+                                prospectQuestionID, 
+                                prospectUserID,
+                                group
+                            );
+       if(typeof val !== "string"){
+            $scope.modal.hide();
+            $state.go('menu.tab.student', {
+                schoolID: $scope.schoolID
+            });          
+       }else{
+            alert(val);
+       }
+    }
+//dialog that warns user before question/conversation is deleted
+    $scope.removeConversation = function (){
+        $ionicModal.fromTemplateUrl('templates/remove-conversation.html', {
+            scope: $scope
+        }).then(function (modal) {
+            $scope.modal = modal;
+            $scope.modal.show();
+        });
+    }
+
+}])
 /*the advisor see private questions and open chat
 *
 */
@@ -610,56 +728,68 @@ settings for mentor
     $scope.askQuestion = function(){
         $state.go('menu.tab.ask');
     }
-    $scope.openChatRoom = function (advisorID, schoolID, question, advisorKey, selfKey, prospectUserID, email, prospectQuestionID1) {
-        //TODO: toggle conversationStarted to false
-        if(!advisorID){
-            if(!prospectUserID){
-                alert('your question has not been answered yet');
+    $scope.openChatRoom = function (advisorID, schoolID, question, advisorKey, selfKey, prospectUserID, email, prospectQuestionID1, status, groupID, publicQuestionKey) {
+        if(status === 'private' || !status){
+            if(!advisorID){
+                if(!prospectUserID){
+                    alert('your question has not been answered yet');
 
-                return;
+                    return;
+                }
             }
-        }
-        if(!!prospectUserID){//question answerer
-            /*the advisorKey and advisorID are not params
+            if(!!prospectUserID){//question answerer
+                /*the advisorKey and advisorID are not params
                 Instead they are stored in scope when the question answerer logs in
                 prospectQuestionID is the original key that is in the school and is retrieved 
                 like room.$id
-            */
-            $state.go('menu.tab.chat', {
-                advisorID: $scope.userID,
-                schoolID: $scope.schoolID,
-                advisorKey: selfKey,//name.$id get self key
-                prospectUserID: prospectUserID,
-                prospectQuestionID: prospectQuestionID1,//get the prospects added question key
-                schoolsQuestionID: '',
-                question: question,
-                displayName: '',
-                email: email,
-                group: '',
-                who: 'answerer'   
-            });
-            Users.toggleQuestionBackAfterClick($scope.userID, selfKey);//toggle back own question name.$id
-        }
+                */
+                $state.go('menu.tab.chat', {
+                    advisorID: $scope.userID,
+                    schoolID: $scope.schoolID,
+                    advisorKey: selfKey,//name.$id get self key
+                    prospectUserID: prospectUserID,
+                    prospectQuestionID: prospectQuestionID1,//get the prospects added question key
+                    schoolsQuestionID: '',
+                    question: question,
+                    displayName: '',
+                    email: email,
+                    group: '',
+                    who: 'answerer'   
+                });
+                Users.toggleQuestionBackAfterClick($scope.userID, selfKey);//toggle back own question name.$id
+            }
 
-        if(!!advisorID){ //question asker -- response return
+            if(!!advisorID){ //question asker -- response return
             /*when advisor adds their advisorID and advisorKey, the asker can chat 
             because the question has been answered
             */
-            $state.go('menu.tab.chat', {
-                advisorID: advisorID,
-                schoolID: schoolID,
-                advisorKey: advisorKey,
-                prospectUserID: $scope.userID, //
-                prospectQuestionID: selfKey, //name.$id to get self key
-                schoolsQuestionID: '',
-                question: question,
-                displayName: '',
-                email: $scope.email,
-                group: '',
-                who: 'asker'
+                $state.go('menu.tab.chat', {
+                    advisorID: advisorID,
+                    schoolID: schoolID,
+                    advisorKey: advisorKey,
+                    prospectUserID: $scope.userID, //
+                    prospectQuestionID: selfKey, //name.$id to get self key
+                    schoolsQuestionID: '',
+                    question: question,
+                    displayName: '',
+                    email: $scope.email,
+                    group: '',
+                    who: 'asker'
 
+                });
+                Users.toggleQuestionBackAfterClick($scope.userID, selfKey);//toggle back own question name.$id
+            }
+        }else{
+            $state.go('menu.tab.publicchat', {
+                prospectUserID: $scope.userID,
+                prospectQuestionID: selfKey,
+                schoolsQuestionID: publicQuestionKey,
+                displayName: '',
+                question: question,
+                group: groupID,
+                wrap: 'wrap'
             });
-            Users.toggleQuestionBackAfterClick($scope.userID, selfKey);//toggle back own question name.$id
+            //Users.toggleQuestionBackAfterClick($scope.userID, selfKey);
         }
     }
 }])
@@ -701,21 +831,32 @@ settings for mentor
         Users.updateUserGroup(val.groupID, val.groupName, $scope.userID);  
     });
     
-    $scope.openChatRoom = function (question, prospectUserID, prospectQuestionID, schoolsQuestionID, displayName, email) {
-
-        $state.go('menu.tab.chat', {
-            advisorID: $scope.userID,
-            schoolID: $scope.schoolID,
-            advisorKey: '',
-            prospectUserID: prospectUserID,
-            prospectQuestionID: prospectQuestionID,
-            schoolsQuestionID: schoolsQuestionID,
-            question: question,
-            displayName: displayName,
-            email: email,
-            group: $scope.groupID,
-            who: 'answerer'
-        });
+    $scope.openChatRoom = function (question, prospectUserID, prospectQuestionID, schoolsQuestionID, displayName, email, status) {
+       if(status === 'private'){
+            $state.go('menu.tab.chat', {
+                advisorID: $scope.userID,
+                schoolID: $scope.schoolID,
+                advisorKey: '',
+                prospectUserID: prospectUserID,
+                prospectQuestionID: prospectQuestionID,
+                schoolsQuestionID: schoolsQuestionID,
+                question: question,
+                displayName: displayName,
+                email: email,
+                group: $scope.groupID,
+                who: 'answerer'
+            });
+       }else{
+             $state.go('menu.tab.publicchat', {
+                prospectUserID: prospectUserID,
+                prospectQuestionID: prospectQuestionID,//not currently avaiable for wrap question
+                schoolsQuestionID: schoolsQuestionID,
+                displayName: displayName,
+                question: question,
+                group: $scope.groupID,
+                wrap: ''//hides ability to wrap question
+            });
+       }
     }
  
 }])
@@ -726,7 +867,8 @@ settings for mentor
     function ($scope, $state, Users, Rooms, groupsMentorsDataService, stripDot, $ionicLoading, $http, Questions){
     var icon='',
         grpID,
-        grpName;
+        grpName,
+        status;
     if(!$scope.userID){
         $scope.userID = Users.getIDS('userID');
     }
@@ -740,7 +882,7 @@ settings for mentor
     $scope.user = {}
     $scope.data = { 'listg' : '', 'search' : '', 'groups': ''};
 
-   
+
    $scope.searchg = function() {
      groupsMentorsDataService.retrieveDataSort($scope.data.groups, function(promise){
                 promise.then(
@@ -752,20 +894,55 @@ settings for mentor
                 )
             });
     }
-  
+
     $scope.ask = function (quest){         
           if(!quest.group && !quest.group.groupID){
                 alert('please select a group');
                 return;
-          }   
+          } 
+          
+          status = !quest.ischecked ? 'private' : 'public';
           grpID = quest.group.groupID;
           grpName = quest.group.groupName;
                 if(quest.question.amount >= 15){
                     $ionicLoading.show({
                         template: 'Sending...'
                     });
-                
-                     Users.addQuestionToUser(
+                if(status === 'public'){
+                        Rooms.addQuestionsToSchool(
+                            $scope.schoolID, 
+                            $scope.userID,
+                            quest.question.value,
+                            'ion-chatbubbles', 
+                            '',
+                            $scope.displayName,
+                            $scope.email,
+                            grpID,
+                            grpName,
+                            status 
+                        ).then(function(data){
+                             Users.addQuestionToUser(
+                                $scope.schoolID, 
+                                $scope.userID, 
+                                quest.question.value,
+                                'ion-help-circled',
+                                false,
+                                false,
+                                false,
+                                false,
+                                grpName,
+                                status,
+                                grpID,
+                                data.key()
+                            ).then(function(){
+                                $ionicLoading.hide();
+                                $state.go('menu.tab.studentc');
+                                $scope.data.search = '';
+                                $scope.user.question = '';
+                            });
+                        });
+                    }else{
+                        Users.addQuestionToUser(
                             $scope.schoolID, 
                             $scope.userID, 
                             quest.question.value,
@@ -774,7 +951,10 @@ settings for mentor
                             false,
                             false,
                             false,
-                            grpName
+                            grpName,
+                            status,
+                            grpID,
+                            null 
                         ).then(function(data){
                             Rooms.addQuestionsToSchool(
                                 $scope.schoolID, 
@@ -785,15 +965,16 @@ settings for mentor
                                 $scope.displayName,
                                 $scope.email,
                                 grpID,
-                                grpName 
+                                grpName,
+                                status 
                             ).then(function(){
                                 $ionicLoading.hide();
                                 $state.go('menu.tab.studentc');
                                 $scope.data.search = '';
                                 $scope.user.question = '';
+                            });
                         });
-                    });
-
+                    }
                     Questions.save({
                         question: quest.question.value,
                         school: $scope.schoolID

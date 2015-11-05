@@ -36,6 +36,56 @@ angular.module('mychat.services', ['firebase'])
                 ref.key() === chat.$id; // true item has been removed
             });
         },
+        get: function (chatID) {
+            for (var i = 0; i < chats.length; i++) {
+                if (chats[i].ID === parseInt(chatID)) {
+                    return chats[i];
+                }
+            }
+            return null;
+        },
+        getSelectedRoomName: function (cb) {
+            var selectedRoom;
+            if (selectedRoomID && selectedRoomID != null) {
+                  return Rooms.get(selectedRoomID, function(room){
+                    if (room)
+                        selectedRoom = room.schoolname;
+                    else
+                        selectedRoom = null;
+
+                    cb(selectedRoom);
+                });
+            } else{
+                return null;
+            }
+
+        },
+        selectRoom: function (schoolID, advisorID, advisorKey) {
+            selectedRoomID = schoolID;
+            if(!!advisorKey){
+                chats = $firebase(ref.child(advisorID).child('questions').child(advisorKey).child('conversations')).$asArray();
+            }else{
+                chats = null;
+            }
+        },
+        send: function (from, schoolID, message, toggleUserID, toggleQuestionID) {
+            //console.log("sending message from :" + from.displayName + " & message is " + message);
+            
+            if (from && message) {
+                var chatMessage = {
+                    from: from,
+                    message: message,
+                    schoolID: schoolID,
+                    createdAt: Firebase.ServerValue.TIMESTAMP
+                };
+                 chats.$add(chatMessage).then(function (data) {
+                    ref.child(toggleUserID).child('questions').child(toggleQuestionID)
+                        .update({'conversationStarted':true});
+            
+                });
+              
+            }
+        },
         wrapitup: function(advisorKey, advisorID, schoolID, schoolsQuestionID, prospectQuestionID, prospectUserID, question, email, userID, groupID){
             var returnval;
             if(email){
@@ -87,6 +137,26 @@ angular.module('mychat.services', ['firebase'])
                     );
             }
             return returnval;
+        }
+    }
+}])
+/*
+* public chat room
+*/
+.factory('PublicChat', ['$firebase', 'Users', 'Rooms', function ($firebase, Users, Rooms) {
+    // Might use a resource here that returns a JSON array
+    var ref = new Firebase(firebaseUrl+'/schools');
+    var chats;
+    var selectedRoomID;
+    //$firebase(ref.child('schools').child(selectedRoomID).child('chats')).$asArray();
+    return {
+        all: function (from) {
+            return chats;
+        },
+        remove: function (chat) {
+            chats.$remove(chat).then(function (ref) {
+                ref.key() === chat.$id; // true item has been removed
+            });
         },
         get: function (chatID) {
             for (var i = 0; i < chats.length; i++) {
@@ -112,15 +182,11 @@ angular.module('mychat.services', ['firebase'])
             }
 
         },
-        selectRoom: function (schoolID, advisorID, advisorKey) {
+        selectRoom: function (schoolID, questionID, groupID) {
             selectedRoomID = schoolID;
-            if(!!advisorKey){
-                chats = $firebase(ref.child(advisorID).child('questions').child(advisorKey).child('conversations')).$asArray();
-            }else{
-                chats = null;
-            }
+            chats = $firebase(ref.child(schoolID).child('questions').child(groupID).child(questionID).child('conversations')).$asArray();  
         },
-        send: function (from, schoolID, message, toggleUserID, toggleQuestionID) {
+       send: function (from, schoolID, message, toggleUserID, toggleQuestionID) {
             //console.log("sending message from :" + from.displayName + " & message is " + message);
             
             if (from && message) {
@@ -130,17 +196,42 @@ angular.module('mychat.services', ['firebase'])
                     schoolID: schoolID,
                     createdAt: Firebase.ServerValue.TIMESTAMP
                 };
-                 chats.$add(chatMessage).then(function (data) {
-                    ref.child(toggleUserID).child('questions').child(toggleQuestionID)
-                        .update({'conversationStarted':true});
+                chats.$add(chatMessage).then(function (data) {
+                    /*Users.getRef().child(toggleUserID).child('questions').child(toggleQuestionID)
+                        .update({'conversationStarted':true});*/
             
                 });
               
             }
+        },
+        wrapitup: function(schoolID, schoolsQuestionID, prospectQuestionID, prospectUserID, groupID){
+            var returnval;
+            var question = ref.child(schoolID).child('questions').child(groupID).child(schoolsQuestionID);
+                    question.remove(
+                        function (err){
+                            if(err){
+                                returnval = 'there was an error deleting' + err;
+                            }else{
+                                questionProspect = Users.getRef().child(prospectUserID).child('questions').child(prospectQuestionID);
+                                questionProspect.remove(
+                                    function (err){
+                                        if(err){
+                                            returnval = 'there was an error deleting' + err;
+                                        }else{
+                                            returnval = true;
+                                        }
+
+                                    }
+                                    );
+                                        
+                            }
+                        }
+                    );
+            
+            return returnval;
         }
     }
 }])
-
 /**
  * Simple Service which returns Rooms collection as Array from Salesforce & binds to the Scope in Controller
  */
@@ -170,7 +261,7 @@ angular.module('mychat.services', ['firebase'])
         checkSchoolExist: function(schoolID){
             return $firebase(ref.child(schoolID).child('questions')).$asArray();
         },
-        addQuestionsToSchool: function(schoolID, userID, question, icon, questionID, displayName, email, groupID, groupName){
+        addQuestionsToSchool: function(schoolID, userID, question, icon, questionID, displayName, email, groupID, groupName, status){
             var qdata = {
                 schoolID: schoolID,
                 userID: userID,
@@ -180,6 +271,7 @@ angular.module('mychat.services', ['firebase'])
                 displayName: displayName,
                 email: email,
                 groupID: groupID,
+                status: status,
                 createdAt: Firebase.ServerValue.TIMESTAMP
             }
         
@@ -206,7 +298,7 @@ angular.module('mychat.services', ['firebase'])
         getUserByID: function(studentID){
              return $firebase(ref.child(studentID).child('questions')).$asArray();
         },
-        addQuestionToUser: function(schoolID, ID, question, icon, questionID, prospectUserID, displayName, email, groupName){
+        addQuestionToUser: function(schoolID, ID, question, icon, questionID, prospectUserID, displayName, email, groupName, status, groupID, publicQuestionKey){
             var user = this.getUserByID(ID);
             if(!!questionID){
                 return user.$add(
@@ -217,7 +309,8 @@ angular.module('mychat.services', ['firebase'])
                         prospectUserID: prospectUserID,
                         displayName: displayName,
                         email: email, 
-                        icon: icon
+                        icon: icon,
+                        status: 'private'
                     });
             }else{
                 return user.$add(
@@ -225,7 +318,10 @@ angular.module('mychat.services', ['firebase'])
                         schoolID: schoolID, 
                         question: question, 
                         icon: icon,
-                        groupName: groupName
+                        groupName: groupName,
+                        status: status,
+                        groupID: groupID,
+                        publicQuestionKey: publicQuestionKey
                     });
             }
         },
@@ -279,50 +375,24 @@ angular.module('mychat.services', ['firebase'])
             var arr = $firebase(ref.child(schoolID)).$asArray();
             var deferred = $q.defer();
             var added;
+            var groupID = stripDot.generatePass();
 
-            arr.$loaded(function(data){
-                if(!!data && data.length){
-                    var groupID = stripDot.generatePass();
-                    arr.$add({'groupName':groupName, 'groupID': groupID}).then(function(data){
-                            $timeout( function(){
-        
-                                deferred.resolve({
-                                    key: function(){ 
-                                        return {
-                                            'groupKey': data.key(),
-                                            'groupID': groupID
-                                        }
-                                    }
+                arr.$add({'groupName':groupName, 'groupID': groupID}).then(function(data){
+                    $timeout( function(){
+                        deferred.resolve({
+                            key: function(){ 
+                                return {
+                                    'groupKey': data.key(),
+                                    'groupID': groupID
+                                }
+                            }
+                        });
 
-                                });
-
-                            }, 200);
+                    }, 200);
 
                         cb(deferred.promise);
-                    });
-                }else{
-                    var groupID = stripDot.generatePass();
-                    var newGroup = ref.child(schoolID);
-                    var newRef = newGroup.push();
-                        newRef.set({'groupName':groupName, 'groupID': groupID});
-
-                        $timeout( function(){
-        
-                            deferred.resolve({
-                                key: function(){ 
-                                    return {
-                                        'groupKey': newRef.key(),
-                                        'groupID': groupID
-                                    }
-                                }
-
-                            });
-
-                        }, 200);
-
-                    cb(deferred.promise);
-                }
-            });
+                });
+               
             
        },
        /*part of add/edit group - this deletes the group

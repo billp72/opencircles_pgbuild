@@ -161,8 +161,17 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
                 controller: 'ChatCtrl'  
             }   
         }
+    })
+      .state('menu.tab.publicchat', {
+        url: '/chat/:prospectUserID/:prospectQuestionID/:schoolsQuestionID/:displayName/:question/:group/:wrap',
+        views: {
+            'tab-publicchat':{
+                templateUrl: 'templates/tab-chat.html',
+                controller: 'PublicChatCtrl'  
+            }   
+        }
     });
-
+//PublicChatCtrl
     // if none of the above states are matched, use this as the fallback
     $urlRouterProvider.otherwise('/login');
 
