@@ -68,7 +68,7 @@ angular.module('mychat.services', ['firebase'])
                 chats = null;
             }
         },
-        send: function (from, schoolID, message, toggleUserID, toggleQuestionID) {
+        send: function (from, schoolID, message, toggleUserID, toggleQuestionID, avatar) {
             //console.log("sending message from :" + from.displayName + " & message is " + message);
             
             if (from && message) {
@@ -76,7 +76,8 @@ angular.module('mychat.services', ['firebase'])
                     from: from,
                     message: message,
                     schoolID: schoolID,
-                    createdAt: Firebase.ServerValue.TIMESTAMP
+                    createdAt: Firebase.ServerValue.TIMESTAMP,
+                    avatar: avatar
                 };
                  chats.$add(chatMessage).then(function (data) {
                     ref.child(toggleUserID).child('questions').child(toggleQuestionID)
@@ -186,7 +187,7 @@ angular.module('mychat.services', ['firebase'])
             selectedRoomID = schoolID;
             chats = $firebase(ref.child(schoolID).child('questions').child(groupID).child(questionID).child('conversations')).$asArray();  
         },
-       send: function (from, schoolID, message, toggleUserID, toggleQuestionID) {
+       send: function (from, schoolID, message, toggleUserID, toggleQuestionID, avatar) {
             //console.log("sending message from :" + from.displayName + " & message is " + message);
             
             if (from && message) {
@@ -194,7 +195,8 @@ angular.module('mychat.services', ['firebase'])
                     from: from,
                     message: message,
                     schoolID: schoolID,
-                    createdAt: Firebase.ServerValue.TIMESTAMP
+                    createdAt: Firebase.ServerValue.TIMESTAMP,
+                    avatar: avatar
                 };
                 chats.$add(chatMessage).then(function (data) {
                     /*Users.getRef().child(toggleUserID).child('questions').child(toggleQuestionID)
@@ -359,13 +361,14 @@ angular.module('mychat.services', ['firebase'])
         removeItem: function (key){
             $window.localStorage.removeItem(key);
         },
-        addAnswerToAdvisor: function (from, schoolID, message, questionsID, userID){
+        addAnswerToAdvisor: function (from, schoolID, message, questionsID, userID, avatar){
             var user = this.getUserConversation(userID, questionsID);
             var chatMessage = {
                     from: from,
                     message: message,
                     schoolID: schoolID,
-                    createdAt: Firebase.ServerValue.TIMESTAMP
+                    createdAt: Firebase.ServerValue.TIMESTAMP,
+                    avatar: avatar
                 };
             return user.$add(chatMessage);
        },
@@ -507,9 +510,9 @@ angular.module('mychat.services', ['firebase'])
     var ref = new Firebase(firebaseUrl);
     return {
 
-        change: function (user){
+        change: function (user, schoolemail){
                 ref.changePassword({
-                    email: user.schoolemail,
+                    email: schoolemail,
                     oldPassword: user.oldPassword,
                     newPassword: user.newPassword
                 }, function(error) {
@@ -676,8 +679,72 @@ angular.module('mychat.services', ['firebase'])
         }
     }
 }])
-
+.service('ConnectionCheck', ['$http', '$q', '$timeout', ConnectionCheck])
 .service('RequestsService', ['$http', '$q', '$ionicLoading',  RequestsService]);
+
+    function ConnectionCheck ($http, $q, $timeout){
+
+       var timeOutInteger = null;
+       var timeOutOccured = false;
+
+       var net_callback = function (cb){
+
+            timeOutInteger = $timeout(function () {
+                timeOutOccured = true;
+            }, 20 * 1000 );
+
+            var networkState = navigator.connection.type;
+ 
+            var states = {};
+            states[Connection.UNKNOWN]  = 'Unknown connection';
+            states[Connection.ETHERNET] = 'Ethernet connection';
+            states[Connection.WIFI]     = 'WiFi connection';
+            states[Connection.CELL_2G]  = 'Cell 2G connection';
+            states[Connection.CELL_3G]  = 'Cell 3G connection';
+            states[Connection.CELL_4G]  = 'Cell 4G connection';
+            states[Connection.NONE]     = 'No network connection';
+
+            if(states[networkState] == 'No network connection'){
+                if(!timeOutOccured){
+                    $timeout.cancel(timeOutInteger);
+                    cb(false);
+                }
+            }else{
+                var url = "http://theopencircles.com/opencircles/loadImage.jpg";
+ 
+                $http(
+                        { 
+                            type: "GET",
+                            data: "{}",
+                            url: url,
+                            cache: false,
+                            timeout: 20 * 1000
+                        }).
+                        success(function(response){
+
+                               if(!timeOutOccured){
+                                    $timeout.cancel(timeOutInteger);
+                                    cb(true);
+                                    
+                                }
+                            }).
+                            error(function(xhr, textStatus, errorThrown) {
+                            
+                                    if(!timeOutOccured){
+                                        $timeout.cancel(timeOutInteger);
+                                        cb(false);
+                                    }
+                            });
+                        
+            }
+
+        }
+
+
+        return {
+            netCallback: net_callback
+        }
+    }
 
     function RequestsService($http, $q, $ionicLoading){
 

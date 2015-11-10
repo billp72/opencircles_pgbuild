@@ -15,6 +15,7 @@ angular.module('mychat.controllers', [])
     'pushService',
     '$window',
     '$timeout',
+    'ConnectionCheck',
     function (
     $scope, 
     $ionicModal, 
@@ -29,7 +30,8 @@ angular.module('mychat.controllers', [])
     stripDot,
     pushService,
     $window,
-    $timeout) {
+    $timeout,
+    ConnectionCheck) {
     //console.log('Login Controller Initialized');
 
     var ref = new Firebase($scope.firebaseUrl);
@@ -140,10 +142,8 @@ angular.module('mychat.controllers', [])
                 ref.child("users").child(userData.uid).set({
                     user:{
                         displayName: user.displayname +'-'+ stripDot.shortRandom(),
-                        grade: user.grade,
                         schoolID: stripDot.strip(user.schoolID.domain),
-                        schoolEmail: user.schoolemail,
-                        email: user.email
+                        schoolEmail: user.schoolemail
                     }
                 });
                 $ionicLoading.hide();
@@ -214,59 +214,73 @@ angular.module('mychat.controllers', [])
                 });
     }
     $scope.signIn = function (user) {
+
         $window.localStorage.setItem('test', 'test');
-        if($window.localStorage.getItem('test') === null){
-             alert('You must activate local storage on your device to use this app');
-            $scope.modal.hide();           
-        }else{
+
+            if($window.localStorage.getItem('test') === null){
+                alert('You must activate local storage on your device to use this app');
+                $scope.modal.hide(); 
+
+                return; 
+            }         
+       
             $window.localStorage.removeItem('test');
         
             if (user && user.email && user.pwdForLogin) {
 
-                $ionicLoading.show({
-                    template: 'Signing In...'
-                });
-                auth.$authWithPassword({
-                    email: user.email,
-                    password: user.pwdForLogin
-                }).then(function (authData) {
+                ConnectionCheck.netCallback(function(bool){
+                    if(!bool){
+                        alert('Your connection is weak or not avaiable');
+                    }else{
+
+                    $ionicLoading.show({
+                        template: 'Signing In...'
+                    });
+                    auth.$authWithPassword({
+                        email: user.email,
+                        password: user.pwdForLogin
+                    }).then(function (authData) {
                 
-                    ref.child("users").child(authData.uid+'/user').once('value', function (snapshot) {
-                        var val = snapshot.val();
-                        var groupID    = !!val.groupID ? {'groupID':val.groupID, 'groupName':val.groupName} : {'groupID': 'gen', 'groupName':'General'};
-                      
-                        $rootScope.schoolID    = val.schoolID;
-                        $rootScope.group       = groupID;
-                        $rootScope.email       = val.email;
-                        //$rootScope.groupKey    = !!val.groups ? true : false;
-                        $rootScope.userID      = authData.uid;
-                        $rootScope.displayName = val.displayName;
+                        ref.child("users").child(authData.uid+'/user').once('value', function (snapshot) {
+                            var val = snapshot.val();
+                            //get and store gavitar image inside authData  - https://en.gravatar.com/
+                            var group              = !!val.groupID ? {'groupID':val.groupID, 'groupName':val.groupName} : {'groupID': 'gen', 'groupName':'General'};
+                            $rootScope.email       = val.schoolEmail;
+                            $rootScope.schoolID    = val.schoolID;
+                            $rootScope.group       = group;
+                            //$rootScope.groupKey    = !!val.groups ? true : false;
+                            $rootScope.userID      = authData.uid;
+                            $rootScope.displayName = val.displayName;
+                            $rootScope.superuser   = !!val.superuser ? val.superuser : null;
                        
-                    //persist data
-                        Users.storeIDS(val.schoolID, 'schoolID');
-                        Users.storeIDS(groupID, 'groupID');
-                        Users.storeIDS(authData.uid, 'userID');
-                        Users.storeIDS(val.displayName, 'displayName');
+                        //persist data
+                            Users.storeIDS(authData.password.profileImageURL, 'avatar');
+                            Users.storeIDS(val.schoolID, 'schoolID');
+                            Users.storeIDS(group, 'group');
+                            Users.storeIDS(authData.uid, 'userID');
+                            Users.storeIDS(val.displayName, 'displayName');
 
-                        pushService.register().then(function(token){
-                            console.log("token: ", token);
-                        });
+                            pushService.register().then(function(token){
+                                console.log("token: ", token);
+                            });
 
-                        $scope.modal.hide();
+                            $scope.modal.hide();
                     
-                        $state.go('menu.tab.student');
-                    
-                        $ionicLoading.hide();  
-                });
+                            $state.go('menu.tab.student');
+                      
+                    });
                 
-            }).catch(function (error) {
-                alert("Authentication failed:" + error.message);
-                $ionicLoading.hide();
-            });
+                }).catch(function (error) {
+                    alert("Authentication failed:" + error.message);
+                    $ionicLoading.hide();
+                });
+            }
+         });
+
         } else{
             alert("Please enter email and password both");
         }
-      }
+
     }   
 }])
 /*
@@ -294,11 +308,16 @@ settings for mentor
         $scope.data = { 'list' : '', 'groups' : ''};
         $scope.add.newgroup = !!Users.getIDS('groupName') ? Users.getIDS('groupName') : '';
 
+        $scope.runChangePassword = function(user){
+
+            ChangePassword.change(user, $scope.email);
+        }
         $scope.askQuestion = function(){
 
             $state.go('menu.tab.ask');
         }
-        $scope.searchg = function() {
+        
+        /*$scope.searchg = function() {
             groupsMentorsDataService.retrieveDataSort($scope.data.groups, function(promise){
                 promise.then(
                     function(matches) {
@@ -313,6 +332,14 @@ settings for mentor
                 )
             });
         }
+          $scope.update = function (data){
+            $rootScope.group = {
+                'groupID': data.groupID,
+                'groupName': data.groupName
+            }
+        }
+
+        */
         $scope.create = function(add){
             $scope.allGroups = Users.getAllGroups($scope.userID);
             
@@ -380,12 +407,6 @@ settings for mentor
             $scope.hideNewGroup  = false;
             $scope.modalGrp.hide();
         }*/
-        $scope.update = function (data){
-            $rootScope.group = {
-                'groupID': data.groupID,
-                'groupName': data.groupName
-            }
-        }
         /*$scope.deleteAccount = function(){
                 $ionicModal.fromTemplateUrl('templates/delete-account.html', {
                     scope: $scope
@@ -408,8 +429,8 @@ settings for mentor
 /*
 * opens the private chat room
 */
-.controller('ChatCtrl', ['$scope', '$rootScope', 'Chats', 'Users', 'Rooms', '$state', '$window', '$ionicLoading', '$ionicModal', '$ionicScrollDelegate', '$timeout', 'RequestsService',
-    function ($scope, $rootScope, Chats, Users, Rooms, $state, $window, $ionicLoading, $ionicModal, $ionicScrollDelegate, $timeout, RequestsService) {
+.controller('ChatCtrl', ['$scope', '$rootScope', 'Chats', 'Users', 'Rooms', '$state', '$window', '$ionicModal', '$ionicScrollDelegate', '$timeout', 'RequestsService',
+    function ($scope, $rootScope, Chats, Users, Rooms, $state, $window, $ionicModal, $ionicScrollDelegate, $timeout, RequestsService) {
     //console.log("Chat Controller initialized");
     var 
         advisorKey          = $state.params.advisorKey,
@@ -465,7 +486,7 @@ settings for mentor
         //console.log('id',advisorID, 'key', advisorKey);
         Chats.selectRoom(schoolID, advisorID, advisorKey);
 
-    Chats.getSelectedRoomName(function(roomName){
+    Chats.getSelectedRoomName(function (roomName){
     // Fetching Chat Records only if a Room is Selected
         if (roomName) {
             $scope.roomName = " - " + roomName;
@@ -477,16 +498,15 @@ settings for mentor
                 }, 0);
         
             },true);
-            
         }
     });
     $scope.sendMessage = function (msg) {
         if(!firstMessage){
-            Chats.send($scope.displayName, schoolID, msg, toggleUserID, toggleQuestionID);
+            Chats.send($scope.displayName, schoolID, msg, toggleUserID, toggleQuestionID, Users.getIDS('avatar'));
             $scope.IM.textMessage = "";
         }else{//first time an advisor asnwers a question
                if($scope.displayName === displayName){
-                    alert('No need to answer your own question.');
+                    alert('No need to attend your own event.');
 
                     return;
                 }
@@ -511,7 +531,8 @@ settings for mentor
                         schoolID,
                         msg,
                         $scope.advisorKey,
-                        advisorID
+                        advisorID,
+                        Users.getIDS('avatar')
                     )               
                 })
                 .then(function (results){
@@ -593,8 +614,8 @@ settings for mentor
 * opens the public chat room
 *
 */
-.controller('PublicChatCtrl', ['$scope', 'PublicChat', 'Users', '$state', '$window', '$ionicLoading', '$ionicModal', '$ionicScrollDelegate', '$timeout', 'RequestsService',
-    function ($scope, PublicChat, Users, $state, $window, $ionicLoading, $ionicModal, $ionicScrollDelegate, $timeout, RequestsService) {
+.controller('PublicChatCtrl', ['$scope', 'PublicChat', 'Users', '$state', '$window', '$ionicModal', '$ionicScrollDelegate', '$timeout', 'RequestsService',
+    function ($scope, PublicChat, Users, $state, $window, $ionicModal, $ionicScrollDelegate, $timeout, RequestsService) {
     //console.log("Chat Controller initialized");
     var 
         prospectUserID      = $state.params.prospectUserID,
@@ -656,12 +677,11 @@ settings for mentor
                 }, 0);
         
             },true);
-            
         }
     });
     $scope.sendMessage = function (msg) {
         if(!firstMessage){
-            PublicChat.send($scope.displayName, $scope.schoolID, msg, toggleQuestionID, toggleUserID);
+            PublicChat.send($scope.displayName, $scope.schoolID, msg, toggleQuestionID, toggleUserID, Users.getIDS('avatar'));
             $scope.IM.textMessage = "";
         }else{
 
@@ -714,6 +734,7 @@ settings for mentor
 .controller('AdvisorConversationsCtrl', ['$scope', '$rootScope', 'Users', 'Chats', 'Rooms', '$state', '$window',
     function ($scope, $rootScope, Users, Chats, Rooms, $state, $window) {
     console.log("Student conversations Controller initialized");
+    
     if(!$scope.userID){
         $scope.userID = Users.getIDS('userID');
     }
@@ -723,7 +744,7 @@ settings for mentor
     $scope.school = Users.getUserByID($scope.userID);
     $scope.school.$loaded(function(data){
          $scope.rooms = data;
-         
+
      });
     $scope.askQuestion = function(){
         $state.go('menu.tab.ask');
@@ -732,7 +753,7 @@ settings for mentor
         if(status === 'private' || !status){
             if(!advisorID){
                 if(!prospectUserID){
-                    alert('your question has not been answered yet');
+                    alert('Waiting for a participant ...');
 
                     return;
                 }
@@ -797,23 +818,39 @@ settings for mentor
 /*this controller is for public questions
 *
 */
-.controller('AdvisorCtrl', ['$scope', '$rootScope', 'Users', 'Chats', 'Rooms', '$state', '$window', 
-    function ($scope, $rootScope, Users, Chats, Rooms, $state, $window) {
+.controller('AdvisorCtrl', ['$scope', '$rootScope', 'Users', 'Chats', 'Rooms', '$state', '$window', 'groupsMentorData', '$ionicLoading',
+    function ($scope, $rootScope, Users, Chats, Rooms, $state, $window, groupsMentorData, $ionicLoading) {
     console.log("Student Controller initialized");
-    
+    var stop;
     if(!$scope.schoolID){
         $scope.schoolID = Users.getIDS('schoolID');
     }
     if(!$scope.userID){
         $scope.userID = Users.getIDS('userID');
     }
-    if(!$scope.group){
-        $scope.groupID = Users.getIDS('groupID').groupID;
-    }
+   
     $scope.askQuestion = function(){
         $state.go('menu.tab.ask');
     }
+    $scope.user = {}
+    $scope.data = {'list': ''};
+    $scope.$watch('tabs', function(old, newv){
+        if(newv === 'events' || old === 'events'){
+            groupsMentorData.getGroupByID($scope.schoolID, function (matches){
+                matches.push({'groupID': 'sel', 'groupName':'Select Group'});
+                $scope.user.group = matches[matches.length-1];
+                $scope.data.list = matches;
 
+            });
+        }
+    });
+
+    $scope.update = function (data){
+            $scope.group = {
+                'groupID': data.groupID,
+                'groupName': data.groupName
+            }
+    }
     $scope.$watch('group', function(oldValue, newValue){
         var val;
         if(!!oldValue){
@@ -823,12 +860,15 @@ settings for mentor
         }
 
         $scope.groupID = val.groupID;
-        $scope.title1 = val.groupName;
+        $scope.title1  = val.groupName;
+
         $scope.school = Rooms.getSchoolBySchoolID($scope.schoolID, $scope.groupID);
             $scope.school.$loaded(function(data){
                 $scope.rooms = data;
         });
         Users.updateUserGroup(val.groupID, val.groupName, $scope.userID);  
+
+        $ionicLoading.hide();
     });
     
     $scope.openChatRoom = function (question, prospectUserID, prospectQuestionID, schoolsQuestionID, displayName, email, status) {
@@ -878,7 +918,7 @@ settings for mentor
     if(!$scope.displayName){
         $scope.displayName = Users.getIDS('displayName');
     }
-
+    $scope.sudo = !$scope.superuser ? false : true;
     $scope.user = {}
     $scope.data = { 'listg' : '', 'search' : '', 'groups': ''};
 
@@ -900,8 +940,9 @@ settings for mentor
                 alert('please select a group');
                 return;
           } 
-          
-          status = !quest.ischecked ? 'private' : 'public';
+    
+          status = !!quest.ischecked ? 'public' : 'private';
+
           grpID = quest.group.groupID;
           grpName = quest.group.groupName;
                 if(quest.question.amount >= 15){
@@ -925,7 +966,7 @@ settings for mentor
                                 $scope.schoolID, 
                                 $scope.userID, 
                                 quest.question.value,
-                                'ion-help-circled',
+                                'ion-chatbubble',
                                 false,
                                 false,
                                 false,
@@ -946,7 +987,7 @@ settings for mentor
                             $scope.schoolID, 
                             $scope.userID, 
                             quest.question.value,
-                            'ion-help-circled',
+                            'ion-chatbubble',
                             false,
                             false,
                             false,
