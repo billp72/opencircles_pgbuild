@@ -3,7 +3,7 @@
 <widget xmlns     = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
         id        = "com.theopencircles.com.opencircles"
-        version   = "1.6.4">
+        version   = "1.6.5">
 
     <name>Open Circles</name>
 
@@ -40,7 +40,7 @@
     <preference name="SplashScreenDelay"          value="3000" />
     <preference name="phonegap-version"           value="cli-5.2.0" />
     <!-- ios overlay not on start up-->
-    <preference name="StatusBarOverlaysWebView" value="false" />
+    <preference name="StatusBarOverlaysWebView"   value="false" />
     <!--
         Define a specific version of PhoneGap to build into your app.
         <preference name="phonegap-version"       value="3.5.0" />
