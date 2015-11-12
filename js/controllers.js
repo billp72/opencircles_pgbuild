@@ -28,7 +28,7 @@ angular.module('mychat.controllers', [])
     stripDot,
     pushService,
     $window) {
-    //console.log('Login Controller Initialized');
+
     var ref = new Firebase($scope.firebaseUrl);
     var auth = $firebaseAuth(ref);
     $scope.$on('$ionicView.enter', function(){
@@ -255,7 +255,7 @@ angular.module('mychat.controllers', [])
                             Users.storeIDS(val.displayName, 'displayName');
 
                             pushService.register().then(function(token){
-                                console.log("token: ", token);
+          
                             });
 
                             $scope.modal.hide();
@@ -287,9 +287,7 @@ angular.module('mychat.controllers', [])
 settings for mentor
 */
 .controller('SettingsCtrlMentor', ['$scope', '$rootScope','Users', 'ChangePassword', '$state', '$ionicLoading', '$ionicModal', 'Auth', 'groupsMentorsDataService',
-    function ($scope, $rootScope, Users, ChangePassword, $state, $ionicLoading, $ionicModal, Auth, groupsMentorsDataService) {
-        console.log('settings mentor initialized');
-     
+    function ($scope, $rootScope, Users, ChangePassword, $state, $ionicLoading, $ionicModal, Auth, groupsMentorsDataService) { 
         /*part of add/edit group
         */
         //$scope.showEditGroup = !!$scope.groupKey ? true : false;
@@ -408,7 +406,6 @@ settings for mentor
                 });
         }*/
         $scope.logout = function () {
-            console.log("Logging out from the app");
             $ionicLoading.show({
                 template: 'Logging Out...'
             });
@@ -421,8 +418,31 @@ settings for mentor
 /*
 * opens the private chat room
 */
-.controller('ChatCtrl', ['$scope', 'Chats', 'Users', 'Rooms', '$state', '$window', '$ionicModal', '$ionicPopup', '$ionicScrollDelegate', '$timeout', 'RequestsService', 'ConnectionCheck',
-    function ($scope, Chats, Users, Rooms, $state, $window, $ionicModal, $ionicPopup, $ionicScrollDelegate, $timeout, RequestsService, ConnectionCheck) {
+.controller('ChatCtrl', [
+                '$scope', 
+                'Chats', 
+                'Users', 
+                'Rooms', 
+                '$state',  
+                '$ionicModal', 
+                '$ionicPopup',
+                '$ionicLoading', 
+                '$ionicScrollDelegate', 
+                '$timeout', 
+                'RequestsService', 
+                'ConnectionCheck',
+        function ($scope, 
+                  Chats, 
+                  Users, 
+                  Rooms, 
+                  $state,  
+                  $ionicModal, 
+                  $ionicPopup,
+                  $ionicLoading, 
+                  $ionicScrollDelegate, 
+                  $timeout, 
+                  RequestsService, 
+                  ConnectionCheck) {
         
         $scope.$watch('tabs', function(old, newv){
             if(newv !== 'chatprivate' || old === 'chatprivate'){
@@ -442,7 +462,7 @@ settings for mentor
                 })
             }
         });
-    //console.log("Chat Controller initialized");
+  
     var 
         advisorKey          = $state.params.advisorKey,
         schoolID            = $state.params.schoolID,
@@ -474,9 +494,7 @@ settings for mentor
     },0);
     var viewScroll = $ionicScrollDelegate.$getByHandle('userMessageScroll');
     function keepKeyboardOpen() {
-      //console.log('keepKeyboardOpen');
       txtInput.one('blur', function() {
-        //console.log('textarea blur, focus back on it');
         txtInput[0].focus();
       });
     }
@@ -494,11 +512,9 @@ settings for mentor
         }
         $scope.avatar   = $state.params.avatar;
         $scope.question = $state.params.question;
-        //console.log('id',advisorID, 'key', advisorKey);
         Chats.selectRoom(schoolID, advisorID, advisorKey);
 
     Chats.getSelectedRoomName(function (roomName){
-    // Fetching Chat Records only if a Room is Selected
         if (roomName) {
             $scope.roomName = " - " + roomName;
             $scope.chats = Chats.all($scope.displayName);
@@ -524,38 +540,43 @@ settings for mentor
                 $ionicLoading.show({
                     template: 'Sending...'
                 });
-                Users.addQuestionToUser( //request 1
-                    schoolID,
-                    advisorID,
-                    $scope.question,
-                    'ion-chatbubbles', 
-                    prospectQuestionID, 
-                    prospectUserID,
-                    displayName,
-                    email 
+                Users.addQuestionToUser({
+                    schoolID:schoolID, 
+                    ID:advisorID, 
+                    question:$scope.question, 
+                    icon:'ion-chatbubbles', 
+                    questionID:prospectQuestionID, 
+                    prospectUserID:prospectUserID, 
+                    displayName:displayName,
+                    avatar:Users.getIDS('avatar')
+                 }
                 )
                 .then(function (results){
                    $scope.addAnswerAdvisor = results;
                    $scope.advisorKey = results.key();
                    return Users.addAnswerToAdvisor( //request 2
-                        $scope.displayName,
-                        schoolID,
-                        msg,
-                        $scope.advisorKey,
-                        advisorID,
-                        Users.getIDS('avatar')
+                        {
+                            from: $scope.displayName, 
+                            schoolID: schoolID, 
+                            message: msg, 
+                            questionsID: $scope.advisorKey, 
+                            userID: advisorID, 
+                            avatar: Users.getIDS('avatar')
+                        }
                     )               
                 })
                 .then(function (results){
                     $scope.updateProspectQuestion = results;
                     return Users.updateProspectQuestion( //request 3
-                        prospectUserID, 
-                        prospectQuestionID, 
-                        advisorID, 
-                        $scope.advisorKey,
-                        schoolsQuestionID,
-                        schoolID,
-                        group 
+                        {
+                            studentID: prospectUserID, 
+                            questionID: prospectQuestionID, 
+                            advisorID: advisorID, 
+                            advisorKey: $scope.advisorKey, 
+                            originalID: schoolsQuestionID, 
+                            schoolID: schoolID, 
+                            groupID: group
+                        } 
                     )
                             
                 })
@@ -625,8 +646,27 @@ settings for mentor
 * opens the public chat room
 *
 */
-.controller('PublicChatCtrl', ['$scope', 'PublicChat', 'Users', '$state', '$window', '$ionicModal', '$ionicPopup', '$ionicScrollDelegate', '$timeout', 'RequestsService', 'ConnectionCheck',
-    function ($scope, PublicChat, Users, $state, $window, $ionicModal, $ionicPopup, $ionicScrollDelegate, $timeout, RequestsService, ConnectionCheck) {
+.controller('PublicChatCtrl', [
+                    '$scope', 
+                    'PublicChat', 
+                    'Users', 
+                    '$state',  
+                    '$ionicModal', 
+                    '$ionicPopup', 
+                    '$ionicScrollDelegate', 
+                    '$timeout', 
+                    'RequestsService', 
+                    'ConnectionCheck',
+        function ($scope, 
+                  PublicChat, 
+                  Users, 
+                  $state, 
+                  $ionicModal, 
+                  $ionicPopup, 
+                  $ionicScrollDelegate, 
+                  $timeout, 
+                  RequestsService, 
+                  ConnectionCheck) {
 
         $scope.$watch('tabs', function(old, newv){
             if(newv !== 'chatpublic' || old === 'chatpublic'){
@@ -639,14 +679,11 @@ settings for mentor
                         $timeout(function(){
                             alertPopup.close();
                         }, 2000);
-                        /*alertPopup.then(function(res) {
-                            console.log(res);
-                        });*/
                     }
                 })
             }
         });
-    //console.log("Chat Controller initialized");
+
     var 
         prospectUserID      = $state.params.prospectUserID,
         prospectQuestionID  = $state.params.prospectQuestionID,
@@ -679,9 +716,7 @@ settings for mentor
     },0);
     var viewScroll = $ionicScrollDelegate.$getByHandle('userMessageScroll');
     function keepKeyboardOpen() {
-      //console.log('keepKeyboardOpen');
       txtInput.one('blur', function() {
-        //console.log('textarea blur, focus back on it');
         txtInput[0].focus();
       });
     }
@@ -692,12 +727,10 @@ settings for mentor
         
         $scope.avatar   = $state.params.avatar;
         $scope.question = $state.params.question;
-        
-        //console.log('id',advisorID, 'key', advisorKey);
+
         PublicChat.selectRoom($scope.schoolID, schoolsQuestionID, group);
 
     PublicChat.getSelectedRoomName(function(roomName){
-    // Fetching Chat Records only if a Room is Selected
         if (roomName) {
             $scope.roomName = " - " + roomName;
             $scope.chats = PublicChat.all($scope.displayName);
@@ -764,8 +797,7 @@ settings for mentor
 */
 .controller('AdvisorConversationsCtrl', ['$scope', 'Users', 'Chats', 'Rooms', '$state', '$window',
     function ($scope, Users, Chats, Rooms, $state, $window) {
-    console.log("Student conversations Controller initialized");
-    
+
     if(!$scope.userID){
         $scope.userID = Users.getIDS('userID');
     }
@@ -854,7 +886,7 @@ settings for mentor
 */
 .controller('AdvisorCtrl', ['$scope', 'Users', 'Chats', 'Rooms', '$state', '$window', 'groupsMentorData', '$ionicLoading',
     function ($scope, Users, Chats, Rooms, $state, $window, groupsMentorData, $ionicLoading) {
-    console.log("Student Controller initialized");
+
     var stop;
     if(!$scope.schoolID){
         $scope.schoolID = Users.getIDS('schoolID');
@@ -939,8 +971,8 @@ settings for mentor
 /*the prospect can ask a question
 *
 */
-.controller('AskCtrl', ['$scope', '$state', 'Users', 'Rooms', 'groupsMentorsDataService', 'stripDot', '$ionicLoading', '$http', 'Questions',
-    function ($scope, $state, Users, Rooms, groupsMentorsDataService, stripDot, $ionicLoading, $http, Questions){
+.controller('AskCtrl', ['$scope', '$state', 'Users', 'Rooms', 'groupsMentorsDataService', 'stripDot', '$ionicLoading', 'Questions',
+    function ($scope, $state, Users, Rooms, groupsMentorsDataService, stripDot, $ionicLoading, Questions){
     var icon='',
         grpID,
         grpName,
@@ -964,8 +996,7 @@ settings for mentor
                 promise.then(
                     function(matches) {
                         $scope.user.group = matches[0];
-                        $scope.data.listg = matches;  
-                    //console.log($rootScope.group);     
+                        $scope.data.listg = matches;     
                     }
                 )
             });
@@ -978,7 +1009,7 @@ settings for mentor
           } 
     
           status = !!quest.ischecked ? 'public' : 'private';
-
+         
           grpID = quest.group.groupID;
           grpName = quest.group.groupName;
                 if(quest.question.amount >= 15){
@@ -987,32 +1018,31 @@ settings for mentor
                     });
                 if(status === 'public'){
                         Rooms.addQuestionsToSchool(
-                            $scope.schoolID, 
-                            $scope.userID,
-                            quest.question.value,
-                            'ion-chatbubbles', 
-                            '',
-                            $scope.displayName,
-                            $scope.email,
-                            grpID,
-                            grpName,
-                            status,
-                            Users.getIDS('avatar') 
+                            {
+                                schoolID: $scope.schoolID, 
+                                userID: $scope.userID, 
+                                question: quest.question.value, 
+                                icon: 'ion-chatbubbles', 
+                                questionID: null, 
+                                displayName: $scope.displayName, 
+                                email: $scope.email, 
+                                groupID: grpID, 
+                                groupName: grpName, 
+                                status: status, 
+                                avatar: Users.getIDS('avatar') 
+                            } 
                         ).then(function(data){
-                             Users.addQuestionToUser(
-                                $scope.schoolID, 
-                                $scope.userID, 
-                                quest.question.value,
-                                'ion-chatbubble',
-                                false,
-                                false,
-                                false,
-                                false,
-                                grpName,
-                                status,
-                                grpID,
-                                data.key(),
-                                Users.getIDS('avatar')
+                             Users.addQuestionToUser({
+                                schoolID:$scope.schoolID, 
+                                ID:$scope.userID, 
+                                question:quest.question.value, 
+                                icon:'ion-chatbubble',
+                                groupName: grpName, 
+                                status: status, 
+                                groupID: grpID, 
+                                publicQuestionKey: data.key(), 
+                                avatar:Users.getIDS('avatar')
+                                }
                             ).then(function(){
                                 $ionicLoading.hide();
                                 $state.go('menu.tab.studentc');
@@ -1021,33 +1051,32 @@ settings for mentor
                             });
                         });
                     }else{
-                        Users.addQuestionToUser(
-                            $scope.schoolID, 
-                            $scope.userID, 
-                            quest.question.value,
-                            'ion-chatbubble',
-                            false,
-                            false,
-                            false,
-                            false,
-                            grpName,
-                            status,
-                            grpID,
-                            null,
-                            Users.getIDS('avatar') 
+                        Users.addQuestionToUser({
+                                schoolID:$scope.schoolID, 
+                                ID:$scope.userID, 
+                                question:quest.question.value, 
+                                icon:'ion-chatbubble',
+                                groupName: grpName, 
+                                status: status, 
+                                groupID: grpID,
+                                publicQuestionKey: null, 
+                                avatar:Users.getIDS('avatar')
+                                } 
                         ).then(function(data){
                             Rooms.addQuestionsToSchool(
-                                $scope.schoolID, 
-                                $scope.userID,
-                                quest.question.value,
-                                'ion-chatbubbles', 
-                                data.key(),
-                                $scope.displayName,
-                                $scope.email,
-                                grpID,
-                                grpName,
-                                status,
-                                Users.getIDS('avatar') 
+                                {
+                                schoolID: $scope.schoolID, 
+                                userID: $scope.userID, 
+                                question: quest.question.value, 
+                                icon: 'ion-chatbubbles', 
+                                questionID: data.key(), 
+                                displayName: $scope.displayName, 
+                                email: $scope.email, 
+                                groupID: grpID, 
+                                groupName: grpName, 
+                                status: status, 
+                                avatar: Users.getIDS('avatar') 
+                            } 
                             ).then(function(){
                                 $ionicLoading.hide();
                                 $state.go('menu.tab.studentc');
