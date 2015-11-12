@@ -540,7 +540,7 @@ settings for mentor
                 $ionicLoading.show({
                     template: 'Sending...'
                 });
-                Users.addQuestionToUser({
+                Users.addQuestionToUser({//add the question to self
                     schoolID:schoolID, 
                     ID:advisorID, 
                     question:$scope.question, 
@@ -548,13 +548,13 @@ settings for mentor
                     questionID:prospectQuestionID, 
                     prospectUserID:prospectUserID, 
                     displayName:displayName,
-                    avatar:Users.getIDS('avatar')
+                    avatar:$scope.avatar
                  }
                 )
                 .then(function (results){
                    $scope.addAnswerAdvisor = results;
                    $scope.advisorKey = results.key();
-                   return Users.addAnswerToAdvisor( //request 2
+                   return Users.addAnswerToAdvisor( //request 2 - add answer to conversation inside question
                         {
                             from: $scope.displayName, 
                             schoolID: schoolID, 
