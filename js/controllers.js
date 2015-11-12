@@ -296,7 +296,7 @@ settings for mentor
         $scope.add  = {};
         $scope.user = {};
         $scope.data = { 'list' : '', 'groups' : ''};
-        $scope.add.newgroup = !!Users.getIDS('groupName') ? Users.getIDS('groupName') : '';
+        //$scope.add.newgroup = !!Users.getIDS('groupName') ? Users.getIDS('groupName') : '';
 
         $scope.runChangePassword = function(user){
 
@@ -306,7 +306,12 @@ settings for mentor
 
             $state.go('menu.tab.ask');
         }
-        
+        $scope.logout = function () {
+            $ionicLoading.show({
+                template: 'Logging Out...'
+            });
+            Auth.$unauth();
+        }
         /*$scope.searchg = function() {
             groupsMentorsDataService.retrieveDataSort($scope.data.groups, function(promise){
                 promise.then(
@@ -329,7 +334,7 @@ settings for mentor
             }
         }
 
-        */
+        
         $scope.create = function(add){
             $scope.allGroups = Users.getAllGroups($scope.userID);
             
@@ -376,8 +381,8 @@ settings for mentor
                
                
         }
-        /*part of add/edit group*/
-        /*$scope.edit = function(add){
+        part of add/edit group
+        $scope.edit = function(add){
             $scope.groupRemoveName = add.newgroup;
             $ionicModal.fromTemplateUrl('templates/delete-group.html', {
                     scope: $scope
@@ -386,8 +391,8 @@ settings for mentor
                     $scope.modalGrp.show();
                 });
             
-        }*/
-        /*$scope.removeGroup = function(){
+        }
+        $scope.removeGroup = function(){
             var groupKey = !!Users.getIDS('groupKey') ? Users.getIDS('groupKey') : $scope.groupKey;
             Users.editGroup(groupKey, $scope.schoolID, $scope.userID, $scope.groupRemoveName);
 
@@ -396,8 +401,8 @@ settings for mentor
             $scope.showEditGroup = false;
             $scope.hideNewGroup  = false;
             $scope.modalGrp.hide();
-        }*/
-        /*$scope.deleteAccount = function(){
+        }
+        $scope.deleteAccount = function(){
                 $ionicModal.fromTemplateUrl('templates/delete-account.html', {
                     scope: $scope
                 }).then(function (modal) {
@@ -405,14 +410,7 @@ settings for mentor
                     $scope.modal.show();
                 });
         }*/
-        $scope.logout = function () {
-            $ionicLoading.show({
-                template: 'Logging Out...'
-            });
-            Auth.$unauth();
-        }
        
-  
 }])
 
 /*
@@ -884,8 +882,8 @@ settings for mentor
 /*this controller is for public questions
 *
 */
-.controller('AdvisorCtrl', ['$scope', 'Users', 'Chats', 'Rooms', '$state', '$window', 'groupsMentorData', '$ionicLoading',
-    function ($scope, Users, Chats, Rooms, $state, $window, groupsMentorData, $ionicLoading) {
+.controller('AdvisorCtrl', ['$scope', 'Users', 'Chats', 'Rooms', '$state', '$window', 'orderAlphanumeric', '$ionicLoading',
+    function ($scope, Users, Chats, Rooms, $state, $window, orderAlphanumeric, $ionicLoading) {
 
     var stop;
     if(!$scope.schoolID){
@@ -902,10 +900,12 @@ settings for mentor
     $scope.data = {'list': ''};
     $scope.$watch('tabs', function(old, newv){
         if(newv === 'events' || old === 'events'){
-            groupsMentorData.getGroupByID($scope.schoolID, function (matches){
-                matches.push({'groupID': 'sel', 'groupName':'Select Group'});
-                $scope.user.group = matches[matches.length-1];
-                $scope.data.list = matches;
+            orderAlphanumeric.retrieveDataSort(function (promise){
+                promise.then(function(matches){
+                    matches.push({'groupID': 'sel', 'groupName':'Select Group'});
+                    $scope.user.group = matches[matches.length-1];
+                    $scope.data.list = matches;
+                });
 
             });
         }
@@ -971,8 +971,8 @@ settings for mentor
 /*the prospect can ask a question
 *
 */
-.controller('AskCtrl', ['$scope', '$state', 'Users', 'Rooms', 'groupsMentorsDataService', 'stripDot', '$ionicLoading', 'Questions',
-    function ($scope, $state, Users, Rooms, groupsMentorsDataService, stripDot, $ionicLoading, Questions){
+.controller('AskCtrl', ['$scope', '$state', 'Users', 'Rooms', 'orderAlphanumeric', 'stripDot', '$ionicLoading', 'Questions',
+    function ($scope, $state, Users, Rooms, orderAlphanumeric, stripDot, $ionicLoading, Questions){
     var icon='',
         grpID,
         grpName,
@@ -991,7 +991,7 @@ settings for mentor
     $scope.data = { 'listg' : '', 'search' : '', 'groups': ''};
 
 
-   $scope.searchg = function() {
+   /*$scope.searchg = function() {
      groupsMentorsDataService.retrieveDataSort($scope.data.groups, function(promise){
                 promise.then(
                     function(matches) {
@@ -1000,10 +1000,24 @@ settings for mentor
                     }
                 )
             });
-    }
+    }*/
 
-    $scope.ask = function (quest){         
-          if(!quest.group && !quest.group.groupID){
+    $scope.$watch('tabs', function(old, newv){
+        if(newv === 'ask' || old === 'ask'){
+            orderAlphanumeric.retrieveDataSort(function (promise){
+                promise.then(function(matches){
+                    matches.push({'groupID': 'sel', 'groupName':'Select Group'});
+                    $scope.user.group = matches[matches.length-1];
+                    $scope.data.listg = matches;
+                });
+
+            });
+        }
+    });
+
+    $scope.ask = function (quest){  
+         //!quest.group && !quest.group.groupID &&        
+          if(quest.group.groupID === 'sel'){
                 alert('please select a group');
                 return;
           } 
