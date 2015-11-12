@@ -14,7 +14,6 @@ angular.module('mychat.controllers', [])
     'stripDot',
     'pushService',
     '$window',
-    'ConnectionCheck',
     function (
     $scope, 
     $ionicModal, 
@@ -28,10 +27,8 @@ angular.module('mychat.controllers', [])
     schoolFormDataService, 
     stripDot,
     pushService,
-    $window,
-    ConnectionCheck) {
+    $window) {
     //console.log('Login Controller Initialized');
-
     var ref = new Firebase($scope.firebaseUrl);
     var auth = $firebaseAuth(ref);
     $scope.$on('$ionicView.enter', function(){
@@ -125,21 +122,13 @@ angular.module('mychat.controllers', [])
             !!user.schoolemail &&
             !!user.displayname && 
             !!user.schoolID &&
-             user.schoolID.domain === emailDomain(user.schoolemail)[0]
+            user.schoolID.domain === emailDomain(user.schoolemail)[0]
              ) 
         {
         
            $ionicLoading.show({
                 template: 'Signing Up...'
             });
-
-             
-            ConnectionCheck.netCallback(function(bool){
-                if(!bool){
-                    alert('Your connection is weak or not avaiable');
-                    $ionicLoading.hide();
-                }else{
-          
                 auth.$createUser({
                     email: user.schoolemail,
                     password: stripDot.generatePass()
@@ -200,9 +189,6 @@ angular.module('mychat.controllers', [])
                     $ionicLoading.hide();
                 });
             
-                }
-            })
-            
         }else{
             alert("Please fill all details properly");
         }
@@ -231,6 +217,8 @@ angular.module('mychat.controllers', [])
                 alert('You must activate local storage on your device to use this app');
                 $scope.modal.hide(); 
 
+                $window.localStorage.removeItem('test');
+
                 return; 
             }         
        
@@ -241,12 +229,6 @@ angular.module('mychat.controllers', [])
                 $ionicLoading.show({
                     template: 'Signing In...'
                 });
-
-                ConnectionCheck.netCallback(function(bool){
-                    if(!bool){
-                        alert('Your connection is weak or not avaiable');
-                        $ionicLoading.hide();
-                    }else{
 
                     auth.$authWithPassword({
                         email: user.email,
@@ -286,8 +268,6 @@ angular.module('mychat.controllers', [])
                     alert("Authentication failed:" + error.message);
                     $ionicLoading.hide();
                 });
-            }
-         });
 
         } else{
             alert("Please enter email and password both");
@@ -441,8 +421,27 @@ settings for mentor
 /*
 * opens the private chat room
 */
-.controller('ChatCtrl', ['$scope', 'Chats', 'Users', 'Rooms', '$state', '$window', '$ionicModal', '$ionicScrollDelegate', '$timeout', 'RequestsService',
-    function ($scope, Chats, Users, Rooms, $state, $window, $ionicModal, $ionicScrollDelegate, $timeout, RequestsService) {
+.controller('ChatCtrl', ['$scope', 'Chats', 'Users', 'Rooms', '$state', '$window', '$ionicModal', '$ionicPopup', '$ionicScrollDelegate', '$timeout', 'RequestsService', 'ConnectionCheck',
+    function ($scope, Chats, Users, Rooms, $state, $window, $ionicModal, $ionicPopup, $ionicScrollDelegate, $timeout, RequestsService, ConnectionCheck) {
+        
+        $scope.$watch('tabs', function(old, newv){
+            if(newv !== 'chatprivate' || old === 'chatprivate'){
+                ConnectionCheck.netCallback(function(state){
+                    if(state){
+                        var alertPopup = $ionicPopup.alert({
+                            title: 'Warning!',
+                            template: state
+                        });
+                        $timeout(function(){
+                            alertPopup.close();
+                        }, 2000);
+                        /*alertPopup.then(function(res) {
+                            console.log(res);
+                        });*/
+                    }
+                })
+            }
+        });
     //console.log("Chat Controller initialized");
     var 
         advisorKey          = $state.params.advisorKey,
@@ -626,8 +625,27 @@ settings for mentor
 * opens the public chat room
 *
 */
-.controller('PublicChatCtrl', ['$scope', 'PublicChat', 'Users', '$state', '$window', '$ionicModal', '$ionicScrollDelegate', '$timeout', 'RequestsService',
-    function ($scope, PublicChat, Users, $state, $window, $ionicModal, $ionicScrollDelegate, $timeout, RequestsService) {
+.controller('PublicChatCtrl', ['$scope', 'PublicChat', 'Users', '$state', '$window', '$ionicModal', '$ionicPopup', '$ionicScrollDelegate', '$timeout', 'RequestsService', 'ConnectionCheck',
+    function ($scope, PublicChat, Users, $state, $window, $ionicModal, $ionicPopup, $ionicScrollDelegate, $timeout, RequestsService, ConnectionCheck) {
+
+        $scope.$watch('tabs', function(old, newv){
+            if(newv !== 'chatpublic' || old === 'chatpublic'){
+                ConnectionCheck.netCallback(function(state){
+                    if(state){
+                        var alertPopup = $ionicPopup.alert({
+                            title: 'Warning!',
+                            template: state
+                        });
+                        $timeout(function(){
+                            alertPopup.close();
+                        }, 2000);
+                        /*alertPopup.then(function(res) {
+                            console.log(res);
+                        });*/
+                    }
+                })
+            }
+        });
     //console.log("Chat Controller initialized");
     var 
         prospectUserID      = $state.params.prospectUserID,
