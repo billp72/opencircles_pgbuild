@@ -10,7 +10,8 @@ angular.module('mychat.controllers', [])
     '$ionicLoading', 
     '$rootScope', 
     '$ionicHistory', 
-    'schoolFormDataService', 
+    'schoolFormDataService',
+    'ConnectionCheck', 
     'stripDot',
     'pushService',
     '$window',
@@ -24,13 +25,27 @@ angular.module('mychat.controllers', [])
     $ionicLoading, 
     $rootScope, 
     $ionicHistory, 
-    schoolFormDataService, 
+    schoolFormDataService,
+    ConnectionCheck, 
     stripDot,
     pushService,
     $window) {
 
     var ref = new Firebase($scope.firebaseUrl);
     var auth = $firebaseAuth(ref);
+
+    ConnectionCheck.netCallback(function(state){
+                if(state){
+                    var alertPopup = $ionicPopup.alert({
+                        title: 'Warning!',
+                        template: state
+                });
+                $timeout(function(){
+                    alertPopup.close();
+                }, 2000);
+            }
+    });
+
     $scope.$on('$ionicView.enter', function(){
             $ionicHistory.clearCache();
             $ionicHistory.clearHistory();
@@ -260,7 +275,7 @@ angular.module('mychat.controllers', [])
 
                             $scope.modal.hide();
                     
-                            $state.transitionTo('menu.tab.student',{},{reload: true, inherit: true, notify: true });
+                            $state.go('menu.tab.student');
                       
                     });
                 
@@ -304,7 +319,7 @@ settings for mentor
         }
         $scope.askQuestion = function(){
 
-            $state.transitionTo('menu.tab.ask',{},{reload: true, inherit: true, notify: true });
+            $state.go('menu.tab.ask');
         }
         $scope.logout = function () {
             $ionicLoading.show({
@@ -441,7 +456,9 @@ settings for mentor
                   $timeout, 
                   RequestsService, 
                   ConnectionCheck) {
-        
+
+        $ionicLoading.show();
+
         $scope.$watch('tabs', function(old, newv){
             if(newv !== 'chatprivate' || old === 'chatprivate'){
                 ConnectionCheck.netCallback(function(state){
@@ -516,6 +533,9 @@ settings for mentor
         if (roomName) {
             $scope.roomName = " - " + roomName;
             $scope.chats = Chats.all($scope.displayName);
+            $scope.chats.$loaded(function(data){
+                $ionicLoading.hide();
+            });
             $scope.$watch('chats', function(newValue, oldValue){
                 $timeout(function() {
                     keepKeyboardOpen();
@@ -622,9 +642,9 @@ settings for mentor
                             );
        if(typeof val !== "string"){
             $scope.modal.hide();
-            $state.transitionTo('menu.tab.student', {
+            $state.go('menu.tab.student', {
                 schoolID: schoolID
-            },{ reload: true, inherit: true, notify: true });          
+            });          
        }else{
             alert(val);
        }
@@ -650,7 +670,8 @@ settings for mentor
                     'Users', 
                     '$state',  
                     '$ionicModal', 
-                    '$ionicPopup', 
+                    '$ionicPopup',
+                    '$ionicLoading', 
                     '$ionicScrollDelegate', 
                     '$timeout', 
                     'RequestsService', 
@@ -660,11 +681,14 @@ settings for mentor
                   Users, 
                   $state, 
                   $ionicModal, 
-                  $ionicPopup, 
+                  $ionicPopup,
+                  $ionicLoading, 
                   $ionicScrollDelegate, 
                   $timeout, 
                   RequestsService, 
                   ConnectionCheck) {
+
+        $ionicLoading.show();
 
         $scope.$watch('tabs', function(old, newv){
             if(newv !== 'chatpublic' || old === 'chatpublic'){
@@ -732,6 +756,9 @@ settings for mentor
         if (roomName) {
             $scope.roomName = " - " + roomName;
             $scope.chats = PublicChat.all($scope.displayName);
+            $scope.chats.$loaded(function(data){
+                $ionicLoading.hide();
+            })
             $scope.$watch('chats', function(newValue, oldValue){
                 $timeout(function() {
                     keepKeyboardOpen();
@@ -772,9 +799,9 @@ settings for mentor
                             );
        if(typeof val !== "string"){
             $scope.modal.hide();
-            $state.transitionTo('menu.tab.student', {
+            $state.go('menu.tab.student', {
                 schoolID: $scope.schoolID
-            },{reload: true, inherit: true, notify: true });          
+            });          
        }else{
             alert(val);
        }
@@ -808,7 +835,7 @@ settings for mentor
 
      });
     $scope.askQuestion = function(){
-        $state.transitionTo('menu.tab.ask',{},{reload: true, inherit: true, notify: true });
+        $state.go('menu.tab.ask');
     }
     $scope.openChatRoom = function (advisorID, schoolID, question, advisorKey, selfKey, prospectUserID, email, prospectQuestionID1, status, groupID, publicQuestionKey, avatar) {
         if(status === 'private' || !status){
@@ -898,7 +925,7 @@ settings for mentor
     }
    
     $scope.askQuestion = function(){
-        $state.transitionTo('menu.tab.ask',{},{reload: true, inherit: true, notify: true });
+        $state.go('menu.tab.ask');
     }
     $scope.user = {}
     $scope.data = {'list': ''};
@@ -935,10 +962,11 @@ settings for mentor
         $scope.school = Rooms.getSchoolBySchoolID($scope.schoolID, $scope.groupID);
             $scope.school.$loaded(function(data){
                 $scope.rooms = data;
+
+                $ionicLoading.hide();
         });
         Users.updateUserGroup(val.groupID, val.groupName, $scope.userID);  
 
-        $ionicLoading.hide();
     });
     
     $scope.openChatRoom = function (question, prospectUserID, prospectQuestionID, schoolsQuestionID, displayName, email, status, avatar) {

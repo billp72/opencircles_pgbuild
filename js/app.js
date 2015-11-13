@@ -121,7 +121,6 @@ function ($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
     })
         .state('menu.tab.ask', {
         url: '/ask',
-        cache: false,
         views: {
             'tab-ask': {
                 templateUrl: 'templates/askQuestion.html',
@@ -131,7 +130,6 @@ function ($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
     })
         .state('menu.tab.student', {
         url: '/studentrooms',
-        cache: false,
         views: {
             'tab-student': {
                 templateUrl: 'templates/tab-rooms-student.html',
@@ -141,7 +139,6 @@ function ($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
     })
         .state('menu.tab.studentc', {
         url: '/conversations',
-        cache: false,
         views: {
             'tab-converse': {
                 templateUrl: 'templates/tab-student-convers.html',
