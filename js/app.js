@@ -121,6 +121,7 @@ function ($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
     })
         .state('menu.tab.ask', {
         url: '/ask',
+        cache: false,
         views: {
             'tab-ask': {
                 templateUrl: 'templates/askQuestion.html',
@@ -130,6 +131,7 @@ function ($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
     })
         .state('menu.tab.student', {
         url: '/studentrooms',
+        cache: false,
         views: {
             'tab-student': {
                 templateUrl: 'templates/tab-rooms-student.html',
@@ -139,6 +141,7 @@ function ($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
     })
         .state('menu.tab.studentc', {
         url: '/conversations',
+        cache: false,
         views: {
             'tab-converse': {
                 templateUrl: 'templates/tab-student-convers.html',
@@ -157,6 +160,7 @@ function ($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
     })
         .state('menu.tab.chat', {
         url: '/chat/:advisorID/:schoolID/:advisorKey/:prospectUserID/:prospectQuestionID/:schoolsQuestionID/:question/:displayName/:email/:group/:who/:avatar',
+        cache: false,
         views: {
             'tab-chat': {
                 templateUrl: 'templates/tab-chat.html',
@@ -166,6 +170,7 @@ function ($stateProvider, $urlRouterProvider, $ionicConfigProvider) {
     })
         .state('menu.tab.publicchat', {
         url: '/chat/:prospectUserID/:prospectQuestionID/:schoolsQuestionID/:displayName/:question/:group/:wrap/:avatar',
+        cache: false,
         views: {
             'tab-publicchat': {
                 templateUrl: 'templates/tab-chat.html',

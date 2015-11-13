@@ -260,7 +260,7 @@ angular.module('mychat.controllers', [])
 
                             $scope.modal.hide();
                     
-                            $state.go('menu.tab.student');
+                            $state.transitionTo('menu.tab.student',{},{reload: true, inherit: true, notify: true });
                       
                     });
                 
@@ -304,7 +304,7 @@ settings for mentor
         }
         $scope.askQuestion = function(){
 
-            $state.go('menu.tab.ask');
+            $state.transitionTo('menu.tab.ask',{},{reload: true, inherit: true, notify: true });
         }
         $scope.logout = function () {
             $ionicLoading.show({
@@ -421,7 +421,7 @@ settings for mentor
                 'Chats', 
                 'Users', 
                 'Rooms', 
-                '$state',  
+                '$state',
                 '$ionicModal', 
                 '$ionicPopup',
                 '$ionicLoading', 
@@ -460,7 +460,7 @@ settings for mentor
                 })
             }
         });
-  
+        
     var 
         advisorKey          = $state.params.advisorKey,
         schoolID            = $state.params.schoolID,
@@ -622,9 +622,9 @@ settings for mentor
                             );
        if(typeof val !== "string"){
             $scope.modal.hide();
-            $state.go('menu.tab.student', {
+            $state.transitionTo('menu.tab.student', {
                 schoolID: schoolID
-            });          
+            },{ reload: true, inherit: true, notify: true });          
        }else{
             alert(val);
        }
@@ -678,7 +678,7 @@ settings for mentor
                             alertPopup.close();
                         }, 2000);
                     }
-                })
+                });
             }
         });
 
@@ -772,9 +772,9 @@ settings for mentor
                             );
        if(typeof val !== "string"){
             $scope.modal.hide();
-            $state.go('menu.tab.student', {
+            $state.transitionTo('menu.tab.student', {
                 schoolID: $scope.schoolID
-            });          
+            },{reload: true, inherit: true, notify: true });          
        }else{
             alert(val);
        }
@@ -808,7 +808,7 @@ settings for mentor
 
      });
     $scope.askQuestion = function(){
-        $state.go('menu.tab.ask');
+        $state.transitionTo('menu.tab.ask',{},{reload: true, inherit: true, notify: true });
     }
     $scope.openChatRoom = function (advisorID, schoolID, question, advisorKey, selfKey, prospectUserID, email, prospectQuestionID1, status, groupID, publicQuestionKey, avatar) {
         if(status === 'private' || !status){
@@ -825,7 +825,7 @@ settings for mentor
                 prospectQuestionID is the original key that is in the school and is retrieved 
                 like room.$id
                 */
-                $state.go('menu.tab.chat', {
+                $state.transitionTo('menu.tab.chat', {
                     advisorID: $scope.userID,
                     schoolID: $scope.schoolID,
                     advisorKey: selfKey,//name.$id get self key
@@ -838,15 +838,18 @@ settings for mentor
                     group: '',
                     who: 'answerer',
                     avatar: avatar   
-                });
+                },{reload: true, inherit: true, notify: true });
+
                 Users.toggleQuestionBackAfterClick($scope.userID, selfKey);//toggle back own question name.$id
             }
 
             if(!!advisorID){ //question asker -- response return
             /*when advisor adds their advisorID and advisorKey, the asker can chat 
             because the question has been answered
+
+            $state.transitionTo($state.current, $stateParams, { reload: true, inherit: true, notify: true });
             */
-                $state.go('menu.tab.chat', {
+                $state.transitionTo('menu.tab.chat', {
                     advisorID: advisorID,
                     schoolID: schoolID,
                     advisorKey: advisorKey,
@@ -860,11 +863,12 @@ settings for mentor
                     who: 'asker',
                     avatar: avatar
 
-                });
+                }, {reload: true, inherit: true, notify: true });
+
                 Users.toggleQuestionBackAfterClick($scope.userID, selfKey);//toggle back own question name.$id
             }
         }else{
-            $state.go('menu.tab.publicchat', {
+            $state.transitionTo('menu.tab.publicchat', {
                 prospectUserID: $scope.userID,
                 prospectQuestionID: selfKey,
                 schoolsQuestionID: publicQuestionKey,
@@ -873,7 +877,7 @@ settings for mentor
                 group: groupID,
                 wrap: 'wrap',
                 avatar: avatar
-            });
+            },{reload: true, inherit: true, notify: true });
             //Users.toggleQuestionBackAfterClick($scope.userID, selfKey);
         }
     }
@@ -894,7 +898,7 @@ settings for mentor
     }
    
     $scope.askQuestion = function(){
-        $state.go('menu.tab.ask');
+        $state.transitionTo('menu.tab.ask',{},{reload: true, inherit: true, notify: true });
     }
     $scope.user = {}
     $scope.data = {'list': ''};
@@ -939,7 +943,7 @@ settings for mentor
     
     $scope.openChatRoom = function (question, prospectUserID, prospectQuestionID, schoolsQuestionID, displayName, email, status, avatar) {
        if(status === 'private'){
-            $state.go('menu.tab.chat', {
+            $state.transitionTo('menu.tab.chat', {
                 advisorID: $scope.userID,
                 schoolID: $scope.schoolID,
                 advisorKey: '',
@@ -952,9 +956,9 @@ settings for mentor
                 group: $scope.groupID,
                 who: 'answerer',
                 avatar: avatar
-            });
+            },{reload: true, inherit: true, notify: true });
        }else{
-             $state.go('menu.tab.publicchat', {
+             $state.transitionTo('menu.tab.publicchat', {
                 prospectUserID: prospectUserID,
                 prospectQuestionID: prospectQuestionID,//not currently avaiable for wrap question
                 schoolsQuestionID: schoolsQuestionID,
@@ -963,7 +967,7 @@ settings for mentor
                 group: $scope.groupID,
                 wrap: '',//hides ability to wrap question
                 avatar: avatar
-            });
+            },{reload: true, inherit: true, notify: true });
        }
     }
  
@@ -1059,7 +1063,7 @@ settings for mentor
                                 }
                             ).then(function(){
                                 $ionicLoading.hide();
-                                $state.go('menu.tab.studentc');
+                                $state.transitionTo('menu.tab.studentc',{},{ reload: true, inherit: true, notify: true });
                                 $scope.data.search = '';
                                 $scope.user.question = '';
                             });
@@ -1093,7 +1097,7 @@ settings for mentor
                             } 
                             ).then(function(){
                                 $ionicLoading.hide();
-                                $state.go('menu.tab.studentc');
+                                $state.transitionTo('menu.tab.studentc',{},{ reload: true, inherit: true, notify: true });
                                 $scope.data.search = '';
                                 $scope.user.question = '';
                             });
@@ -1103,12 +1107,14 @@ settings for mentor
                         question: quest.question.value,
                         school: $scope.schoolID
                     }); 
-                    if(grpID !== 'gen'){
-                        Users.getGroupKeys().
+                    /*if(grpID !== 'gen'){
+                       var keys = Users.getGroupKeys().
                             then(function(data){
                                 Users.sendPushByGroup(data, grpID, $scope.schoolID, grpName);
                             }); 
                     }
+
+                    */
 
                 }else{
                     alert('questions must be at least 15 characters long');
