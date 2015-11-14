@@ -533,6 +533,9 @@ settings for mentor
         if (roomName) {
             $scope.roomName = " - " + roomName;
             $scope.chats = Chats.all($scope.displayName);
+            if(!$scope.chats){
+                $ionicLoading.hide();
+            }
             $scope.chats.$loaded(function(data){
                 $ionicLoading.hide();
             });
@@ -756,6 +759,9 @@ settings for mentor
         if (roomName) {
             $scope.roomName = " - " + roomName;
             $scope.chats = PublicChat.all($scope.displayName);
+            if(!$scope.chats){
+                $ionicLoading.hide();
+            }
             $scope.chats.$loaded(function(data){
                 $ionicLoading.hide();
             })
