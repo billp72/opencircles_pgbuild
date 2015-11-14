@@ -527,7 +527,8 @@ settings for mentor
         }
         $scope.avatar   = $state.params.avatar;
         $scope.question = $state.params.question;
-        Chats.selectRoom(schoolID, advisorID, advisorKey);
+
+    Chats.selectRoom(schoolID, advisorID, advisorKey);
 
     Chats.getSelectedRoomName(function (roomName){
         if (roomName) {
@@ -762,7 +763,7 @@ settings for mentor
         $scope.avatar   = $state.params.avatar;
         $scope.question = $state.params.question;
 
-        PublicChat.selectRoom($scope.schoolID, schoolsQuestionID, group);
+    PublicChat.selectRoom($scope.schoolID, schoolsQuestionID, group);
 
     PublicChat.getSelectedRoomName(function(roomName){
         if (roomName) {
@@ -806,12 +807,12 @@ settings for mentor
     $scope.removePerm = function () {
 
        var val = PublicChat.wrapitup( 
-                                $scope.schoolID, 
-                                schoolsQuestionID, 
-                                prospectQuestionID, 
-                                prospectUserID,
-                                group
-                            );
+                        $scope.schoolID, 
+                        schoolsQuestionID, 
+                        prospectQuestionID, 
+                        prospectUserID,
+                        group
+                    );
        if(typeof val !== "string"){
             $scope.modal.hide();
             $state.go('menu.tab.student', {
@@ -983,7 +984,7 @@ settings for mentor
         Users.updateUserGroup(val.groupID, val.groupName, $scope.userID);  
 
     });
-    
+   
     $scope.openChatRoom = function (question, prospectUserID, prospectQuestionID, schoolsQuestionID, displayName, email, status, avatar) {
        if(status === 'private'){
             $state.transitionTo('menu.tab.chat', {

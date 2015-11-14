@@ -12,21 +12,7 @@ angular.module('mychat.services', ['firebase'])
     var selectedRoomID;
     var ref = new Firebase(firebaseUrl+'/users');
     var chats;
-    var processProspectEmailRequest = function (data){
-        $http({
-            method: 'POST',
-            url: 'http://www.theopencircles.com/opencircles/emailToApplicant_reddel.php', 
-            data: data
-        })
-        .success(function(data, status, headers, config)
-        {
-            console.log(status + ' - ' + data);
-        })
-        .error(function(data, status, headers, config)
-        {
-            console.log('error');
-        });
-    }
+   
     return {
         all: function (from) {
             return chats;
@@ -89,9 +75,7 @@ angular.module('mychat.services', ['firebase'])
         },
         wrapitup: function(advisorKey, advisorID, schoolID, schoolsQuestionID, prospectQuestionID, prospectUserID, question, email, userID, groupID){
             var returnval;
-            if(email){
-                processProspectEmailRequest({'question': question, 'advisorID': advisorID, 'email': email, 'userID': userID});
-            }
+            
             if(!schoolsQuestionID){
                 var question = ref.child(advisorID).child('questions').child(advisorKey);
                     question.remove(
