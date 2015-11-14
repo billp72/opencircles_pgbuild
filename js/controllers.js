@@ -552,6 +552,14 @@ settings for mentor
         if(!firstMessage){
             Chats.send($scope.displayName, schoolID, msg, toggleUserID, toggleQuestionID, Users.getIDS('avatar'));
             $scope.IM.textMessage = "";
+
+            RequestsService.pushNote(
+            {
+                'message':'Message from: ' + $scope.displayName,
+                'userID': toggleUserID,
+                'method':'GET',
+                'path':'push'
+            });
         }else{//first time an advisor asnwers a question
                if($scope.displayName === displayName){
                     alert('No need to attend your own event.');
@@ -610,18 +618,19 @@ settings for mentor
 
                     $scope.addAnswerAdvisor = null;
                     $scope.updateProspectQuestion = null;
+
+                    RequestsService.pushNote(
+                    {
+                        'message':'Message from: ' + $scope.displayName,
+                        'userID': toggleUserID,
+                        'method':'GET',
+                        'path':'push'
+                    });
                 }).catch (function(error){
                     alert('error sending message: ' + error);
                 })
               
         }
-        RequestsService.pushNote(
-            {
-             'message':'Message from: ' + $scope.displayName,
-             'userID': toggleUserID,
-             'method':'GET',
-             'path':'push'
-            });
 
     }
 //removes a single chat message
