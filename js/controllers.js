@@ -248,7 +248,7 @@ angular.module('mychat.controllers', [])
                     template: 'Signing In...'
                 });
 
-                alert(JSON.stringify(auth));
+                alert(JSON.stringify(auth, null, 4));
 
                     auth.$authWithPassword({
                         email: user.email,
@@ -577,7 +577,7 @@ settings for mentor
                 $ionicLoading.show({
                     template: 'Sending...'
                 });
-                alert(JSON.stringify($state.params));
+                alert(JSON.stringify($state.params, null, 4));
 
                 Users.addQuestionToUser({//add the question to self
                     schoolID:schoolID, 
