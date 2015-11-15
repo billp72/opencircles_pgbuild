@@ -144,6 +144,9 @@ angular.module('mychat.controllers', [])
            $ionicLoading.show({
                 template: 'Signing Up...'
             });
+             alert('user params ', user);
+
+             alert('auth ', auth);
                 auth.$createUser({
                     email: user.schoolemail,
                     password: stripDot.generatePass()
@@ -244,7 +247,7 @@ angular.module('mychat.controllers', [])
                 $ionicLoading.show({
                     template: 'Signing In...'
                 });
-
+                alert(auth);
                     auth.$authWithPassword({
                         email: user.email,
                         password: user.pwdForLogin
@@ -534,12 +537,14 @@ settings for mentor
         if (roomName) {
             $scope.roomName = " - " + roomName;
             $scope.chats = Chats.all($scope.displayName);
-            if(!$scope.chats){
+           
+            if(!!$scope.chats){
+                $scope.chats.$loaded(function(data){
+                    $ionicLoading.hide();
+                });
+            }else{
                 $ionicLoading.hide();
-            }
-            $scope.chats.$loaded(function(data){
-                $ionicLoading.hide();
-            });
+            } 
             $scope.$watch('chats', function(newValue, oldValue){
                 $timeout(function() {
                     keepKeyboardOpen();
@@ -570,6 +575,8 @@ settings for mentor
                 $ionicLoading.show({
                     template: 'Sending...'
                 });
+                alert($state.params);
+
                 Users.addQuestionToUser({//add the question to self
                     schoolID:schoolID, 
                     ID:advisorID, 
@@ -592,8 +599,9 @@ settings for mentor
                             questionsID: $scope.advisorKey, 
                             userID: advisorID, 
                             avatar: Users.getIDS('avatar')
-                        }
-                    )               
+                        }).then(function(){}).catch (function(error){
+                            alert('error sending message: ' + error);
+                        });               
                 })
                 .then(function (results){
                     $scope.updateProspectQuestion = results;
@@ -607,7 +615,7 @@ settings for mentor
                             schoolID: schoolID, 
                             groupID: group
                         } 
-                    )
+                    );
                             
                 })
                 .then(function(){
