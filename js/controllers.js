@@ -247,7 +247,9 @@ angular.module('mychat.controllers', [])
                 $ionicLoading.show({
                     template: 'Signing In...'
                 });
-                alert(auth);
+
+                alert(JSON.stringify(auth));
+
                     auth.$authWithPassword({
                         email: user.email,
                         password: user.pwdForLogin
@@ -575,7 +577,7 @@ settings for mentor
                 $ionicLoading.show({
                     template: 'Sending...'
                 });
-                alert($state.params);
+                alert(JSON.stringify($state.params));
 
                 Users.addQuestionToUser({//add the question to self
                     schoolID:schoolID, 
@@ -600,7 +602,7 @@ settings for mentor
                             userID: advisorID, 
                             avatar: Users.getIDS('avatar')
                         }).then(function(){}).catch (function(error){
-                            alert('error sending message: ' + error);
+                            alert('error adding event to advisor: ' + error);
                         });               
                 })
                 .then(function (results){
