@@ -942,7 +942,6 @@ settings for mentor
 .controller('AdvisorCtrl', ['$scope', 'Users', 'Chats', 'Rooms', '$state', '$window', 'orderAlphanumeric', '$ionicLoading',
     function ($scope, Users, Chats, Rooms, $state, $window, orderAlphanumeric, $ionicLoading) {
 
-    var stop;
     if(!$scope.schoolID){
         $scope.schoolID = Users.getIDS('schoolID');
     }
