@@ -2,6 +2,8 @@
 var firebaseUrl = "https://reddel.firebaseio.com";
 
 function onDeviceReady() {
+    var timer = false,
+        timeUp;
 
     setTimeout(function() {
 
@@ -12,10 +14,21 @@ function onDeviceReady() {
     angular.bootstrap(document, ["mychat"]);
 
     document.addEventListener("resume", onResume, false);
+    document.addEventListener("pause", onPause, false);
 
-    function onResume(){     
-       /* navigator.splashscreen.show();
-        location.reload();  */  
+    function onPause(){
+        timer = setTimeout(function(){
+            timeUp = true;
+        }, 6000 * 60 * 60);
+    } 
+
+    function onResume(){ 
+        if(timeUp){
+            navigator.splashscreen.show();
+            location.reload(); 
+            timeUp = false;
+        }    
+        clearTimeout(timer);
     }
 
 }
@@ -57,14 +70,14 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
                 $ionicLoading.hide();
                 $location.path('/login');
             }else{
-               /* if($ionicTabsDelegate.selectedIndex() === 3){
+               if($ionicTabsDelegate.selectedIndex() === 3){
                     $ionicTabsDelegate.select(1);
                 }
                 setTimeout(function() {
 
                     navigator.splashscreen.hide();
 
-                }, 2000);*/
+                }, 1000);
 
             }
         });
