@@ -35,8 +35,8 @@ angular.module('mychat.controllers', [])
     var auth = $firebaseAuth(ref);
 
     ConnectionCheck.netCallback(function(state){
-                if(state){
-                    var alertPopup = $ionicPopup.alert({
+            if(state){
+                var alertPopup = $ionicPopup.alert({
                         title: 'Warning!',
                         template: state
                 });
@@ -144,9 +144,7 @@ angular.module('mychat.controllers', [])
            $ionicLoading.show({
                 template: 'Signing Up...'
             });
-             alert('user params ', user);
-
-             alert('auth ', auth);
+         
                 auth.$createUser({
                     email: user.schoolemail,
                     password: stripDot.generatePass()
@@ -248,8 +246,6 @@ angular.module('mychat.controllers', [])
                     template: 'Signing In...'
                 });
 
-                alert(JSON.stringify(auth, null, 4));
-
                     auth.$authWithPassword({
                         email: user.email,
                         password: user.pwdForLogin
@@ -304,7 +300,7 @@ angular.module('mychat.controllers', [])
     }
 }])
 /*
-settings for mentor
+settings cntrl
 */
 .controller('SettingsCtrlMentor', ['$scope', '$rootScope','Users', 'ChangePassword', '$state', '$ionicLoading', '$ionicModal', 'Auth', 'groupsMentorsDataService',
     function ($scope, $rootScope, Users, ChangePassword, $state, $ionicLoading, $ionicModal, Auth, groupsMentorsDataService) { 
@@ -475,9 +471,6 @@ settings for mentor
                         $timeout(function(){
                             alertPopup.close();
                         }, 2000);
-                        /*alertPopup.then(function(res) {
-                            console.log(res);
-                        });*/
                     }
                 })
             }
@@ -577,7 +570,6 @@ settings for mentor
                 $ionicLoading.show({
                     template: 'Sending...'
                 });
-                alert(JSON.stringify($state.params, null, 4));
 
                 Users.addQuestionToUser({//add the question to self
                     schoolID:schoolID, 

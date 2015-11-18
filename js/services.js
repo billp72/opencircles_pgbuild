@@ -409,7 +409,7 @@ angular.module('mychat.services', ['firebase'])
                 
                 var onComplete = function(error) {
                     if (error) {
-                        console.log('Synchronization failed '+ error);
+                        alert('Synchronization failed '+ error);
                     } else {
                         Rooms.getRef().child(params.schoolID).child('questions').child(params.groupID).child(params.originalID).remove(
                             function(err){
@@ -429,10 +429,8 @@ angular.module('mychat.services', ['firebase'])
        },
        getGroupKeys: function (){
             var deferred = $q.defer();
-            //console.log(groupID, schoolID);
             var keys = [];
             ref.orderByKey().on("child_added", function(snapshot) {
-                //console.log(snapshot.key());
                 keys.push(snapshot.key());
             
                 $timeout( function(){
@@ -579,20 +577,12 @@ angular.module('mychat.services', ['firebase'])
                 //my_media.play();
           } else {
             if (event.coldstart) {
-                console.log('COLDSTART NOTIFICATION');
+                 navigator.notification.vibrate(1000);
             } else {
-                console.log('BACKGROUND NOTIFICATION');
+                 navigator.notification.vibrate(1000);
             }
           }
 
-          //navigator.notification.alert(event.payload.message);
-          navigator.notification.vibrate(1000);
-
-          console.log('MESSAGE -> MSG: ' + event.payload.message);
-          //Only works for GCM
-          console.log('MESSAGE -> MSGCNT: ' + event.payload.msgcnt);
-          //Only works on Amazon Fire OS
-          console.log('MESSAGE -> TIME: ' + event.payload.timeStamp);
           break;
 
       case 'error':
@@ -607,7 +597,7 @@ angular.module('mychat.services', ['firebase'])
   // handle APNS notifications for iOS
   $window.successIosHandler = function (result) {
     console.log('result = ' + result);
-    navigator.notification.alert(result);
+    //navigator.notification.alert(result);
   };
   
   $window.onNotificationAPN = function (e) {

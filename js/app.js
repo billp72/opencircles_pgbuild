@@ -2,8 +2,6 @@
 var firebaseUrl = "https://reddel.firebaseio.com";
 
 function onDeviceReady() {
-    var timer = false,
-        timeUp;
 
     setTimeout(function() {
 
@@ -13,31 +11,11 @@ function onDeviceReady() {
 
     angular.bootstrap(document, ["mychat"]);
 
-    document.addEventListener("resume", onResume, false);
-    document.addEventListener("pause", onPause, false);
-
-    function onPause(){
-        timer = setTimeout(function(){
-            timeUp = true;
-        }, 6000 * 60 * 60);
-    } 
-
-    function onResume(){ 
-        if(timeUp){
-            navigator.splashscreen.show();
-            location.reload(); 
-            timeUp = false;
-        }    
-        clearTimeout(timer);
-    }
-
 }
 //console.log("binding device ready");
 // Registering onDeviceReady callback with deviceready event
 document.addEventListener("deviceready", onDeviceReady, false);
 
-// 'mychat.services' is found in services.js
-// 'mychat.controllers' is found in controllers.js
 angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controllers', 'mychat.services', 'mychat.directives', 'mychat.autocomplete', 'mychat.filters'])
 
     .run(function ($ionicPlatform, $rootScope, $location, Auth, $ionicLoading, $window, $ionicTabsDelegate) {
@@ -66,19 +44,8 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
 
         Auth.$onAuth(function (authData) {
             if (!authData) {
-                console.log("Logged out");
                 $ionicLoading.hide();
                 $location.path('/login');
-            }else{
-               if($ionicTabsDelegate.selectedIndex() === 3){
-                    $ionicTabsDelegate.select(1);
-                }
-                setTimeout(function() {
-
-                    navigator.splashscreen.hide();
-
-                }, 1000);
-
             }
         });
 
