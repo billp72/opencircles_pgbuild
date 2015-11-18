@@ -18,7 +18,7 @@ document.addEventListener("deviceready", onDeviceReady, false);
 
 angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controllers', 'mychat.services', 'mychat.directives', 'mychat.autocomplete', 'mychat.filters'])
 
-    .run(function ($ionicPlatform, $rootScope, $location, Auth, $ionicLoading, $window, $ionicTabsDelegate) {
+    .run(function ($ionicPlatform, $rootScope, $location, Auth, $ionicLoading, $window) {
 
     $ionicPlatform.ready(function () {        
         //localstorage check
@@ -41,8 +41,17 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
 
         $rootScope.firebaseUrl = firebaseUrl;
         $rootScope.displayName = null;
+        $rootScope.email       = null;
+        $rootScope.schoolID    = null;
+        $rootScope.group       = null;
+        $rootScope.gender      = null;
+        //$rootScope.groupKey  = null
+        $rootScope.userID      = null;
+        $rootScope.displayName = null;
+        $rootScope.superuser   = null;
 
         Auth.$onAuth(function (authData) {
+            alert(JSON.stringify(authData, null, 4));
             if (!authData) {
                 $ionicLoading.hide();
                 $location.path('/login');
