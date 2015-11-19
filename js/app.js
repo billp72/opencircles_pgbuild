@@ -21,6 +21,19 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
     .run(function ($ionicPlatform, $rootScope, $location, Auth, $ionicLoading, $window, $state, $timeout, $ionicPopup, ConnectionCheck) {
 
     $ionicPlatform.ready(function () {
+        /*Fixes a change in phonegap that forces FB into offline mode when minimized*/
+        var ref = new Firebase(firebaseUrl+'/users');
+
+        document.addEventListener("resume", onResume, false);
+        document.addEventListener("pause", onPause, false);
+
+        function onPause(){
+            console.log('minimized');
+        } 
+
+        function onResume(){ 
+            Firebase.goOnline();
+        }
 
         ConnectionCheck.netCallback(function(state){
             if(state){
