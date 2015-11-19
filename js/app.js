@@ -18,7 +18,7 @@ document.addEventListener("deviceready", onDeviceReady, false);
 
 angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controllers', 'mychat.services', 'mychat.directives', 'mychat.autocomplete', 'mychat.filters'])
 
-    .run(function ($ionicPlatform, $rootScope, $location, Auth, $ionicLoading, $window) {
+    .run(function ($ionicPlatform, $rootScope, $location, Auth, $ionicLoading, $window, $state, $timeout) {
 
     $ionicPlatform.ready(function () {        
         //localstorage check
@@ -51,11 +51,14 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
         $rootScope.superuser   = null;
 
         Auth.$onAuth(function (authData) {
-            alert(JSON.stringify(authData, null, 4));
             if (!authData) {
                 $ionicLoading.hide();
                 $location.path('/login');
-            }
+            }else{
+                $timeout(function () {
+                    $state.go('menu.tab.student');
+                },10);
+            }   
         });
 
 
