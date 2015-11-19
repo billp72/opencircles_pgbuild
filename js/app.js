@@ -18,9 +18,22 @@ document.addEventListener("deviceready", onDeviceReady, false);
 
 angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controllers', 'mychat.services', 'mychat.directives', 'mychat.autocomplete', 'mychat.filters'])
 
-    .run(function ($ionicPlatform, $rootScope, $location, Auth, $ionicLoading, $window, $state, $timeout) {
+    .run(function ($ionicPlatform, $rootScope, $location, Auth, $ionicLoading, $window, $state, $timeout, $ionicPopup, ConnectionCheck) {
 
-    $ionicPlatform.ready(function () {        
+    $ionicPlatform.ready(function () {
+
+        ConnectionCheck.netCallback(function(state){
+            if(state){
+                var alertPopup = $ionicPopup.alert({
+                        title: 'Warning!',
+                        template: state
+                });
+                $timeout(function(){
+                    alertPopup.close();
+                }, 2000);
+            }
+        });
+       
         //localstorage check
         // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
         /*Google keys

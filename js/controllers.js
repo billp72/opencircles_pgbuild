@@ -11,7 +11,6 @@ angular.module('mychat.controllers', [])
     '$rootScope', 
     '$ionicHistory', 
     'schoolFormDataService',
-    'ConnectionCheck', 
     'stripDot',
     'pushService',
     '$window',
@@ -26,25 +25,12 @@ angular.module('mychat.controllers', [])
     $rootScope, 
     $ionicHistory, 
     schoolFormDataService,
-    ConnectionCheck, 
     stripDot,
     pushService,
     $window) {
 
     var ref = new Firebase($scope.firebaseUrl);
     var auth = $firebaseAuth(ref);
-
-    ConnectionCheck.netCallback(function(state){
-            if(state){
-                var alertPopup = $ionicPopup.alert({
-                        title: 'Warning!',
-                        template: state
-                });
-                $timeout(function(){
-                    alertPopup.close();
-                }, 2000);
-            }
-    });
 
     $scope.$on('$ionicView.enter', function(){
             $ionicHistory.clearCache();
@@ -564,7 +550,6 @@ settings cntrl
         }else{//first time an advisor asnwers a question
                if($scope.displayName === displayName){
                     alert('No need to attend your own event.');
-
                     return;
                 }
                 $ionicLoading.show({
@@ -632,7 +617,7 @@ settings cntrl
                 }).catch (function(error){
                     alert('error sending message: ' + error);
                 })
-              
+
         }
 
     }
@@ -1072,15 +1057,19 @@ settings cntrl
                 alert('please select a group');
                 return;
           } 
-    
+          if(quest.question.amount <= 14){
+                alert('questions must be at least 15 characters long');
+                return;
+           }
           status = !!quest.ischecked ? 'public' : 'private';
          
           grpID = quest.group.groupID;
           grpName = quest.group.groupName;
-                if(quest.question.amount >= 15){
-                    $ionicLoading.show({
-                        template: 'Sending...'
-                    });
+           
+          $ionicLoading.show({
+                template: 'Sending...'
+           });
+
                 if(status === 'public'){
                         Rooms.addQuestionsToSchool(
                             {
@@ -1150,6 +1139,7 @@ settings cntrl
                             });
                         });
                     }
+
                     Questions.save({
                         question: quest.question.value,
                         school: $scope.schoolID
@@ -1162,10 +1152,6 @@ settings cntrl
                     }
 
                     */
-
-                }else{
-                    alert('questions must be at least 15 characters long');
-                }
-            
-    }
+         
+            }
 }]);

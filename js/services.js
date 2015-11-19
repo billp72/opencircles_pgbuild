@@ -660,11 +660,12 @@ angular.module('mychat.services', ['firebase'])
         }
     }
 }])
-.service('ConnectionCheck', ['$http', '$q', '$timeout', ConnectionCheck])
+.service('ConnectionCheck', ['$http', '$q', '$timeout', '$firebase', ConnectionCheck])
 .service('RequestsService', ['$http', '$q', '$ionicLoading',  RequestsService]);
 
-    function ConnectionCheck ($http, $q, $timeout){
+    function ConnectionCheck ($http, $q, $timeout, $firebase){
 
+       var ref = new Firebase(firebaseUrl);
        var timeOutInteger = null;
 
        var net_callback = function (cb){
@@ -673,7 +674,6 @@ angular.module('mychat.services', ['firebase'])
 
             timeOutInteger = $timeout(function () {
                 timeOutOccured = true;
-                cb('Your connection is very slow');
             }, 20 * 1000 );
 
             var networkState = navigator.connection.type;
@@ -694,30 +694,20 @@ angular.module('mychat.services', ['firebase'])
                 }
                 
             }else{
-                var url = "http://theopencircles.com/opencircles/loadImage.jpg";
- 
-                $http(
-                        { 
-                            type: "GET",
-                            data: "{}",
-                            url: url,
-                            cache: false,
-                            timeout: 20 * 1000
-                        }).
-                        success(function(response){
-                            
-                               if(!timeOutOccured){
-                                    $timeout.cancel(timeOutInteger);
-                                    cb(false);  
-                                }
-                            }).
-                            error(function(xhr, textStatus, errorThrown) {
-                            
-                                    if(!timeOutOccured){
-                                        $timeout.cancel(timeOutInteger);
-                                        cb('There was an error with your ' + states[networkState]);
-                                    }
-                            });
+              
+                    ref.child('.info/connected').on('value', function(connectedSnap) {
+                        if (connectedSnap.val() === true) {
+                            if(!timeOutOccured){
+                                $timeout.cancel(timeOutInteger);
+                                cb(false);  
+                            }else{
+                                cb('Your '+ states[networkState] +' connection is alive but slow');
+                            }
+                        } else {
+                           $timeout.cancel(timeOutInteger);
+                            cb('There was an error with your ' + states[networkState]); 
+                        }
+                    });
                         
             }
 
