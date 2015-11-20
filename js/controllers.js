@@ -424,43 +424,23 @@ settings cntrl
                 'Users', 
                 'Rooms', 
                 '$state',
-                '$ionicModal', 
-                '$ionicPopup',
+                '$ionicModal',
                 '$ionicLoading', 
                 '$ionicScrollDelegate', 
                 '$timeout', 
-                'RequestsService', 
-                'ConnectionCheck',
+                'RequestsService',
         function ($scope, 
                   Chats, 
                   Users, 
                   Rooms, 
                   $state,  
-                  $ionicModal, 
-                  $ionicPopup,
+                  $ionicModal,
                   $ionicLoading, 
                   $ionicScrollDelegate, 
                   $timeout, 
-                  RequestsService, 
-                  ConnectionCheck) {
+                  RequestsService) {
 
-        $ionicLoading.show();
-
-        $scope.$watch('tabs', function(old, newv){
-            if(newv !== 'chatprivate' || old === 'chatprivate'){
-                ConnectionCheck.netCallback(function(state){
-                    if(state){
-                        var alertPopup = $ionicPopup.alert({
-                            title: 'Warning!',
-                            template: state
-                        });
-                        $timeout(function(){
-                            alertPopup.close();
-                        }, 2000);
-                    }
-                })
-            }
-        });
+            $ionicLoading.show();
         
     var 
         advisorKey          = $state.params.advisorKey,
@@ -670,41 +650,21 @@ settings cntrl
                     'Users', 
                     '$state',  
                     '$ionicModal', 
-                    '$ionicPopup',
                     '$ionicLoading', 
                     '$ionicScrollDelegate', 
                     '$timeout', 
                     'RequestsService', 
-                    'ConnectionCheck',
         function ($scope, 
                   PublicChat, 
                   Users, 
                   $state, 
                   $ionicModal, 
-                  $ionicPopup,
                   $ionicLoading, 
                   $ionicScrollDelegate, 
                   $timeout, 
-                  RequestsService, 
-                  ConnectionCheck) {
+                  RequestsService) {
 
-        $ionicLoading.show();
-
-        $scope.$watch('tabs', function(old, newv){
-            if(newv !== 'chatpublic' || old === 'chatpublic'){
-                ConnectionCheck.netCallback(function(state){
-                    if(state){
-                        var alertPopup = $ionicPopup.alert({
-                            title: 'Warning!',
-                            template: state
-                        });
-                        $timeout(function(){
-                            alertPopup.close();
-                        }, 2000);
-                    }
-                });
-            }
-        });
+            $ionicLoading.show();
 
     var 
         prospectUserID      = $state.params.prospectUserID,

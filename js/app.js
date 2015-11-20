@@ -23,21 +23,11 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
     $ionicPlatform.ready(function () {
         /*Fixes a change in phonegap that forces FB into offline mode when minimized*/
         var ref = new Firebase(firebaseUrl+'/users');
-
-        document.addEventListener("resume", onResume, false);
-        document.addEventListener("pause", onPause, false);
-
-        function onPause(){
-            console.log('minimized');
-        } 
-
-        function onResume(){ 
-            Firebase.goOnline();
-        }
+        var alertPopup;
 
         ConnectionCheck.netCallback(function(state){
             if(state){
-                var alertPopup = $ionicPopup.alert({
+                alertPopup = $ionicPopup.alert({
                         title: 'Warning!',
                         template: state
                 });
@@ -46,9 +36,18 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
                 }, 2000);
             }
         });
-       
-        //localstorage check
-        // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
+
+        document.addEventListener("resume", onResume, false);
+        document.addEventListener("pause", onPause, false);
+
+        function onPause(){
+            //Firebase.goOffline();
+        } 
+
+        function onResume(){
+            Firebase.goOnline();
+        } 
+            
         /*Google keys
          * key: AIzaSyAbXzuAUk1EICCdfpZhoA6-TleQrPWxJuI
          * Project Number: open-circles-1064/346007849782
@@ -77,8 +76,8 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
         $rootScope.superuser   = null;
 
         Auth.$onAuth(function (authData) {
+            $ionicLoading.hide();
             if (!authData) {
-                $ionicLoading.hide();
                 $location.path('/login');
             }else{
                 $timeout(function () {
@@ -87,7 +86,10 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
             }   
         });
 
-
+        $rootScope.$on("$stateChangeStart", function (event, toState, toParams, fromState, fromParams){
+            $ionicLoading.hide();
+            alertPopup.close();
+        });
         $rootScope.$on("$stateChangeError", function (event, toState, toParams, fromState, fromParams, error) {
             // We can catch the error thrown when the $requireAuth promise is rejected
             // and redirect the user back to the home page
