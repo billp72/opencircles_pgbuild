@@ -28,7 +28,6 @@ angular.module('mychat.controllers', [])
     stripDot,
     pushService,
     $window) {
-
     var ref = new Firebase($scope.firebaseUrl);
     var auth = $firebaseAuth(ref);
 

@@ -16,12 +16,10 @@ function onDeviceReady() {
     document.addEventListener("pause", onPause, false);
 
     function onPause(){
-        console.log('go off line');
         Firebase.goOffline();
     } 
 
     function onResume(){
-        console.log('resume');
         Firebase.goOnline();
     } 
 
@@ -34,11 +32,12 @@ document.addEventListener("deviceready", onDeviceReady, false);
 
 angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controllers', 'mychat.services', 'mychat.directives', 'mychat.autocomplete', 'mychat.filters'])
 
-    .run(function ($ionicPlatform, $rootScope, $location, Auth, $ionicLoading, $window, $state, $timeout, $ionicPopup, ConnectionCheck) {
+    .run(function ($ionicPlatform, $rootScope, $location, Auth, $ionicLoading, $window, $state, $timeout) {
 
     $ionicPlatform.ready(function () {
-        var alertPopup;
 
+        /*
+        deps: $ionicPopup, ConnectionCheck
         ConnectionCheck.netCallback(function(state){
             if(state){
                 alertPopup = $ionicPopup.alert({
@@ -49,7 +48,7 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
                     alertPopup.close();
                 }, 2000);
             }
-        });
+        });*/
             
         /*Google keys
          * key: AIzaSyAbXzuAUk1EICCdfpZhoA6-TleQrPWxJuI
@@ -88,12 +87,11 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
                 },10);
             }   
         });
-
-        $rootScope.$on("$stateChangeStart", function (event, toState, toParams, fromState, fromParams){
+        //params: event, toState, toParams, fromState, fromParams
+        $rootScope.$on("$stateChangeStart", function (){
             $ionicLoading.hide();
-            alertPopup.close();
         });
-        $rootScope.$on("$stateChangeError", function (event, toState, toParams, fromState, fromParams, error) {
+        $rootScope.$on("$stateChangeError", function (error) {
             // We can catch the error thrown when the $requireAuth promise is rejected
             // and redirect the user back to the home page
             if (error === "AUTH_REQUIRED") {

@@ -663,18 +663,21 @@ angular.module('mychat.services', ['firebase'])
 .service('ConnectionCheck', ['$http', '$q', '$timeout', '$firebase', ConnectionCheck])
 .service('RequestsService', ['$http', '$q', '$ionicLoading',  RequestsService]);
 
-    function ConnectionCheck ($http, $q, $timeout, $firebase){
+    function ConnectionCheck ($http, $q, $firebase){
 
        var ref = new Firebase(firebaseUrl);
-       var timeOutInteger = null;
+       //var timeOutInteger = null;
 
        var net_callback = function (cb){
 
-            var timeOutOccured = false;
+            //var timeOutOccured = false;
 
+            /*
+            deps: $timeout
             timeOutInteger = $timeout(function () {
                 timeOutOccured = true;
-            }, 20 * 1000 );
+                $timeout.cancel(timeOutInteger);
+            }, 20 * 1000 );*/
 
             var networkState = navigator.connection.type;
  
@@ -689,7 +692,7 @@ angular.module('mychat.services', ['firebase'])
 
             if(states[networkState] == 'No network connection'){
                 if(!timeOutOccured){
-                    $timeout.cancel(timeOutInteger);
+                    //$timeout.cancel(timeOutInteger);
                     cb(states[networkState]);
                 }
                 
@@ -697,14 +700,9 @@ angular.module('mychat.services', ['firebase'])
               
                     ref.child('.info/connected').on('value', function(connectedSnap) {
                         if (connectedSnap.val() === true) {
-                            if(!timeOutOccured){
-                                $timeout.cancel(timeOutInteger);
-                                cb(false);  
-                            }else{
-                                cb('Your '+ states[networkState] +' connection is alive but slow');
-                            }
+                            cb(false);  
+                            
                         } else {
-                           $timeout.cancel(timeOutInteger);
                             cb('There was an error with your ' + states[networkState]); 
                         }
                     });
