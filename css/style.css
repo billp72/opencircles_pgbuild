@@ -76,17 +76,7 @@ div.item-select {
 .custom-blue{
     background-color: #135dda !important;
 }
-/*.bgcolor{
-    Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#135dda+0,252f41+100 
-    background: #135dda; 
-    background: -moz-linear-gradient(top,  #135dda 0%, #252f41 100%);  FF3.6+ 
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#135dda), color-stop(100%,#252f41));  Chrome,Safari4+ 
-    background: -webkit-linear-gradient(top,  #135dda 0%,#252f41 100%); Chrome10+,Safari5.1+ 
-    background: -o-linear-gradient(top,  #135dda 0%,#252f41 100%);  Opera 11.10+ 
-    background: -ms-linear-gradient(top,  #135dda 0%,#252f41 100%); IE10+ 
-    background: linear-gradient(to bottom,  #135dda 0%,#252f41 100%);  W3C 
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#135dda', endColorstr='#252f41',GradientType=0 ); IE6-9 
-}*/
+
 .transparent{
     background-color: transparent;
 }

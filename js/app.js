@@ -9,6 +9,22 @@ function onDeviceReady() {
 
     }, 3000);
 
+    /*Fixes a change in phonegap that forces FB into offline mode when minimized*/
+    var ref = new Firebase(firebaseUrl+'/users');
+
+    document.addEventListener("resume", onResume, false);
+    document.addEventListener("pause", onPause, false);
+
+    function onPause(){
+        console.log('go off line');
+        Firebase.goOffline();
+    } 
+
+    function onResume(){
+        console.log('resume');
+        Firebase.goOnline();
+    } 
+
     angular.bootstrap(document, ["mychat"]);
 
 }
@@ -21,8 +37,6 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
     .run(function ($ionicPlatform, $rootScope, $location, Auth, $ionicLoading, $window, $state, $timeout, $ionicPopup, ConnectionCheck) {
 
     $ionicPlatform.ready(function () {
-        /*Fixes a change in phonegap that forces FB into offline mode when minimized*/
-        var ref = new Firebase(firebaseUrl+'/users');
         var alertPopup;
 
         ConnectionCheck.netCallback(function(state){
@@ -36,17 +50,6 @@ angular.module('mychat', ['ionic', 'firebase', 'angularMoment', 'mychat.controll
                 }, 2000);
             }
         });
-
-        document.addEventListener("resume", onResume, false);
-        document.addEventListener("pause", onPause, false);
-
-        function onPause(){
-            //Firebase.goOffline();
-        } 
-
-        function onResume(){
-            Firebase.goOnline();
-        } 
             
         /*Google keys
          * key: AIzaSyAbXzuAUk1EICCdfpZhoA6-TleQrPWxJuI
